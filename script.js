@@ -5,7 +5,7 @@
 *  More Ghosts
 *  More Levels
 *  Increment Level upon win
-*  Fruit (apear after so many dots are eaten)
+*  Fruit (gameapear after so many dots are eaten)
 *  
 *
 *  Random Levels
@@ -119,6 +119,10 @@ function runnerStart(){
 					alert("you win!");
 					clearInterval(pacLoop);
 					clearInterval(ghostLoop);
+					if(level+1<levels.length)
+						setUpGame(++level);
+					else
+						setUpGame(level);
 					$('#pause').css('background', "orange");
 					$('#start').css('background', "blue");
 				}
