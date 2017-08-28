@@ -1,0 +1,48 @@
+*{
+	margin: 0px;
+	padding: 0px;
+	background: black;
+	color: white;
+}
+.row{
+	height: 20px;
+	display: block;
+}
+
+.row div{
+	width: 20px;
+	height: 20px;
+	display:inline-block;
+}
+
+.row .brick{
+	width: 18px;
+	height: 18px;
+	background: blue;
+	font-size: 16px;
+	border: 1px solid black;
+}
+
+.row .coin{
+	background: url("coin2.gif") no-repeat center;
+	background-size: contain;
+	width: 10px;
+	height: 10px;
+	margin: 5px;
+}
+
+.pacman{
+	background: url("pacman.gif") no-repeat center;
+	background-size: contain;
+	position: absolute;
+	width: 20px;
+	height: 20px;
+}
+.empty{
+	
+}
+button{
+	font-weight: bold;
+	background: blue;
+	margin-top: 20px;
+}
