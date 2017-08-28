@@ -56,7 +56,7 @@ var ghosts = [
 	y: 5
 	}
 ]
-var speed = 1000;
+var speed = 300;
 var pacLoop;
 var ghostLoop;
 function runnerStart(){
@@ -90,17 +90,29 @@ function runnerStart(){
 				displayWorld();
 				updateScore();
 			}
-			setTimeout(function(){if(coinsRemaining == 0)
-				{alert("you win!");
-				clearInterval(pacLoop);
-				$('#pause').css('background', "orange");
-				$('#start').css('background', "blue");
-				
+			setTimeout(function(){
+				if(coinsRemaining == 0){
+					alert("you win!");
+					clearInterval(pacLoop);
+					clearInterval(ghostLoop);
+					$('#pause').css('background', "orange");
+					$('#start').css('background', "blue");
 				}
-				},50);//give slight delay so pacman will move first before anouncing
-				
+			},10);//give slight delay so pacman will move first before anouncing
+			setTimeout(function(){
+				if(pacman.x==ghosts[0].x && pacman.y == ghosts[0].y){
+					alert("Game Over!")
+					clearInterval(pacLoop);
+					clearInterval(ghostLoop);
+					$('#pause').css('background', "orange");
+					$('#start').css('background', "blue");
+				}
+			},10)
 		}
 	},speed)
+	
+	
+	setTimeout(function(){
 	
 	ghostLoop = setInterval(function(){
 		directions=[]
@@ -113,9 +125,15 @@ function runnerStart(){
 		if(canMove(ghosts[0],"down"))
 			directions.push("down");
 		// pick random valid direction
-		var dir = directions[Math.floor(Math.random()*directions.length)];
+		
+		
+		if(directions.length>2 || !((directions[0]=="up"&&directions[1]=="down")||(directions[0]=="right" &&directions[1]=="left"))){
+			console.log("picking random")
+			var dir = directions[Math.floor(Math.random()*directions.length)];
+			ghosts[0].direction = dir;
+		} //smarter random picking
 		console.log(directions, dir);
-		ghosts[0].direction = dir;
+		
 		if(ghosts[0].direction == "right"){
 				ghosts[0].x = getLocation(++ghosts[0].x, ghosts[0].y)[0];
 			}
@@ -129,7 +147,19 @@ function runnerStart(){
 				ghosts[0].y = getLocation(ghosts[0].x, ++ghosts[0].y)[1];
 			}
 		displayGhosts();
+		
+		setTimeout(function(){
+				if(pacman.x==ghosts[0].x && pacman.y == ghosts[0].y){
+					alert("Game Over!")
+					clearInterval(pacLoop);
+					clearInterval(ghostLoop);
+					$('#pause').css('background', "orange");
+					$('#start').css('background', "blue");
+				}
+			},10)
 	},speed)
+	
+	},50)
 };
 
 function displayWorld(){
