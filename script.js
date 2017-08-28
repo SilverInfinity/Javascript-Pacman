@@ -1,45 +1,68 @@
-// LIst of features:::
+/**
+*	STUFF TO IMPLEMENT
+* ----------------------------
+*  Lives
+*  More Ghosts
+*  More Levels
+*  Increment Level upon win
+*  Fruit (apear after so many dots are eaten)
+*  
+*
+*  Random Levels
+*  Ghost AI
+**/
 
-// 1)have Javascript build the world
-//DONE 1.1)have javascript display the world
-// 2)have pacman move up and down
+/**
+* Original Game notes: 
+* -------------
+*  ghosts’ speed is greatly reduced while they are in the tunnel.
+*  each ghost has a different algorithm for traversing the maze, interesting
+**/
 
-//win condition: eat all coins
-	//keep track of coins on field
-
-var PACMAN = 3;
 var BRICK = 2;
 var COIN = 1;
 var EMPTY = 0;
 
 var world;
-var levels = {
-	level1: [
-	[BRICK,BRICK,BRICK,BRICK,BRICK,BRICK,BRICK,BRICK,BRICK,BRICK],
-	[BRICK,EMPTY,COIN,COIN,COIN,COIN,COIN,COIN,COIN,BRICK],
-	[BRICK,COIN,BRICK,BRICK,BRICK,COIN,BRICK,COIN,COIN,BRICK],
-	[BRICK,COIN,BRICK,COIN,BRICK,COIN,BRICK,EMPTY,COIN,BRICK],
-	[BRICK,COIN,BRICK,COIN,BRICK,COIN,BRICK,COIN,COIN,BRICK],
-	[BRICK,COIN,COIN,COIN,COIN,BRICK,COIN,COIN,COIN,BRICK],
-	[BRICK,BRICK,BRICK,BRICK,BRICK,BRICK,BRICK,BRICK,BRICK,BRICK]],
-	
-	level2:[
-	[2,2,2,2,2,1,2,2,2,2,2],
-	[2,0,1,1,1,1,1,1,1,1,2],
-	[2,1,2,2,2,2,2,2,2,1,2],
-	[2,1,2,1,1,2,1,1,2,1,2],
-	[1,1,2,1,1,1,1,1,2,1,1],
-	[2,1,2,2,1,1,1,2,2,1,2],
-	[2,1,2,2,2,1,2,2,2,1,2],
-	[2,1,1,1,1,1,1,1,1,1,2],
-	[2,2,2,2,2,1,2,2,2,2,2]],
-	
-	
-	
-	
-	
-}
+var levels = [
+	{	world:[
+			[2,2,2,2,2,1,2,2,2,2,2],
+			[2,0,1,1,1,1,1,1,1,1,2],
+			[2,1,2,2,2,2,2,2,2,1,2],
+			[2,1,2,1,1,2,1,1,2,1,2],
+			[1,1,2,1,1,1,1,1,2,1,1],
+			[2,1,2,2,1,1,1,2,2,1,2],
+			[2,1,2,2,2,1,2,2,2,1,2],
+			[2,1,1,1,1,1,1,1,1,1,2],
+			[2,2,2,2,2,1,2,2,2,2,2]],
+		pacman_location: [1,1],
+		inky_location: [5,5],
+		inky_direction: "down"
+	},
+	{	world: [
+		[2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2],
+		[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
+		[2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,1,2,2,2,2,2,2,2,1,2],
+		[2,1,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,2],
+		[2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2],
+		[2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2],
+		[1,1,1,1,2,2,1,2,2,1,2,2,1,2,2,1,2,2,1,2,2,1,1,1,1],
+		[2,2,2,1,2,2,1,2,2,1,2,2,0,2,2,1,2,2,1,2,2,1,2,2,2],
+		[2,2,2,1,1,1,1,2,2,1,2,2,2,2,2,1,2,2,1,1,1,1,2,2,2],
+		[2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2],
+		[2,2,2,1,1,1,1,2,2,2,1,2,2,2,1,2,2,2,1,1,1,1,2,2,2],
+		[2,1,1,1,2,2,1,1,1,2,1,2,2,2,1,2,1,1,1,2,2,1,1,1,2],
+		[2,1,2,2,2,2,2,2,1,2,1,2,2,2,1,2,1,2,2,2,2,2,2,1,2],
+		[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
+		[2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2]
+		],
+		inky_location: [12,7],
+		inky_direction: "up",
+		pacman_location: [1,1]
+	}];
+
 var score = 0;
+var level = 0;
 var coinsRemaining = 0;
 var pacman = {
 	direction: "right",
@@ -51,9 +74,10 @@ var pacman = {
 var ghosts = [
 	{	
 	name: "inky",
-	direction: "down",
+	direction: "right",
 	x: 5,
-	y: 5
+	y: 5,
+	mode: "chase"
 	}
 ]
 var speed = 300;
@@ -128,11 +152,10 @@ function runnerStart(){
 		
 		
 		if(directions.length>2 || !((directions[0]=="up"&&directions[1]=="down")||(directions[0]=="right" &&directions[1]=="left"))){
-			console.log("picking random")
 			var dir = directions[Math.floor(Math.random()*directions.length)];
 			ghosts[0].direction = dir;
 		} //smarter random picking
-		console.log(directions, dir);
+		console.log(directions, dir)
 		
 		if(ghosts[0].direction == "right"){
 				ghosts[0].x = getLocation(++ghosts[0].x, ghosts[0].y)[0];
@@ -220,6 +243,25 @@ function updateScore(){
 	$('#score').text("Score: "+score);
 }
 
+function setUpGame(lv){
+	level = lv;
+	world = levels[level].world;
+	pacman.direction = levels[level].pacman_direction;
+	pacman.x = levels[level].pacman_location[0];
+	pacman.y = levels[level].pacman_location[1];
+	ghosts[0].direction = levels[level].inky_direction;
+	ghosts[0].x = levels[level].inky_location[0];
+	ghosts[0].y = levels[level].inky_location[1];
+	$('h3').text("Level: " + level);
+	
+	displayWorld();
+	displayPacman();
+	displayGhosts();
+	updateScore();
+	coinsRemaining = $('.coin').length;
+}
+
+
 $(document).ready(function(){
 	$(document).on("keydown", function(e){
 		var key = event.which || event.keyCode;
@@ -255,12 +297,14 @@ $(document).ready(function(){
 		$('#pause').css('background', "blue");
 	})
 	
-	world = levels.level2;
-	displayWorld();
-	updateScore();
+	
+	
+	
 	$('#world').after('<div class="pacman" direction="right" style="top: '+ pacman.y*20 +'px; left: '+ pacman.x*20 +'px; "></div>');
 	$('#world').after('<div class="ghost inky" direction="right" style="top: '+ ghosts[0].y*20 +'px; left: '+ ghosts[0].x*20 +'px; "></div>');
-	coinsRemaining = $('.coin').length;
+	setUpGame(0);
+	
+
 
 	
 	
