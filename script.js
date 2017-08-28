@@ -48,8 +48,17 @@ var pacman = {
 	x: 1,
 	y: 1
 }
+var ghosts = [
+	{	
+	name: "inky",
+	direction: "down",
+	x: 5,
+	y: 5
+	}
+]
+var speed = 1000;
 var pacLoop;
-
+var ghostLoop;
 function runnerStart(){
 	
 	pacLoop = setInterval(function(){
@@ -60,7 +69,6 @@ function runnerStart(){
 			}
 		}//if can turn, turn
 		if(canMove(pacman, pacman.direction)){	
-			console.log("moving")
 			if(pacman.direction == "right"){
 				pacman.x = getLocation(++pacman.x, pacman.y)[0];
 			}
@@ -75,7 +83,6 @@ function runnerStart(){
 			}
 			
 			displayPacman();
-			console.log(pacman);
 			if(world[pacman.y][pacman.x] == COIN){
 				world[pacman.y][pacman.x] = EMPTY;
 				score++;
@@ -93,8 +100,36 @@ function runnerStart(){
 				},50);//give slight delay so pacman will move first before anouncing
 				
 		}
-	},300)
+	},speed)
 	
+	ghostLoop = setInterval(function(){
+		directions=[]
+		if (canMove(ghosts[0], "right"))
+			directions.push("right");
+		if(canMove(ghosts[0], "left"))
+			directions.push("left");
+		if(canMove(ghosts[0],"up"))
+			directions.push("up")
+		if(canMove(ghosts[0],"down"))
+			directions.push("down");
+		// pick random valid direction
+		var dir = directions[Math.floor(Math.random()*directions.length)];
+		console.log(directions, dir);
+		ghosts[0].direction = dir;
+		if(ghosts[0].direction == "right"){
+				ghosts[0].x = getLocation(++ghosts[0].x, ghosts[0].y)[0];
+			}
+		if(ghosts[0].direction == "left"){
+				ghosts[0].x = getLocation(--ghosts[0].x, ghosts[0].y)[0];
+			}
+		if(ghosts[0].direction == "up"){
+				ghosts[0].y = getLocation(ghosts[0].x, --ghosts[0].y)[1];
+			}
+		if(ghosts[0].direction == "down"){
+				ghosts[0].y = getLocation(ghosts[0].x, ++ghosts[0].y)[1];
+			}
+		displayGhosts();
+	},speed)
 };
 
 function displayWorld(){
@@ -111,15 +146,19 @@ function displayWorld(){
 				$('.row:last-child').append('<div class="empty"></div>');
 		}
 	}
-	$('#world').append('<div class="pacman" direction="right" style="top: '+ pacman.y*20 +'px; left: '+ pacman.x*20 +'px; "></div>')
 }
 
 function displayPacman(){
 	$('.pacman').css("top", pacman.y*20);
-	$('.pacman').css("left", pacman.x*20)
+	$('.pacman').css("left", pacman.x*20);
 }
+function displayGhosts(){
+	$('.inky').css('top', ghosts[0].y*20);
+	$('.inky').css('left', ghosts[0].x*20);
+	
+}
+
 function canMove(actor,direction){ //actor> obj, direction>string
-	console.log("can move?")
 	
 	
 	if (direction == "right" && world[getLocation(actor.x+1,actor.y)[1]][getLocation(actor.x+1,actor.y)[0]] == BRICK)
@@ -133,8 +172,8 @@ function canMove(actor,direction){ //actor> obj, direction>string
 	
 	return true;
 }
+
 function getLocation(x,y){
-	console.log(world.length, world[0].length)
 	
 	if (x<0)
 		x = world[0].length-1;
@@ -146,6 +185,7 @@ function getLocation(x,y){
 		y = 0;
 	return[x,y];
 }
+
 function updateScore(){
 	$('#score').text("Score: "+score);
 }
@@ -174,6 +214,7 @@ $(document).ready(function(){
 	
 	$('#pause').on("click", function(){
 		clearInterval(pacLoop);
+		clearInterval(ghostLoop);
 		$(this).css('background', "orange");
 		$('#start').css('background', "blue");
 		
@@ -187,6 +228,8 @@ $(document).ready(function(){
 	world = levels.level2;
 	displayWorld();
 	updateScore();
+	$('#world').after('<div class="pacman" direction="right" style="top: '+ pacman.y*20 +'px; left: '+ pacman.x*20 +'px; "></div>');
+	$('#world').after('<div class="ghost inky" direction="right" style="top: '+ ghosts[0].y*20 +'px; left: '+ ghosts[0].x*20 +'px; "></div>');
 	coinsRemaining = $('.coin').length;
 
 	

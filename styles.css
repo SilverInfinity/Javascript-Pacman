@@ -38,6 +38,13 @@
 	width: 20px;
 	height: 20px;
 }
+.inky{
+	background: url("inky.gif") no-repeat center;
+	background-size: contain;
+	position: absolute;
+	width: 20px;
+	height: 20px;
+}
 .empty{
 	
 }
