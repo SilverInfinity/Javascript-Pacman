@@ -12,6 +12,7 @@
 *  Ghost AI
 *  Blinky's chase
 *  Better documentation
+*  refreshing the board (when you collect a coin) creates a lot of lag too many divs to build
 **/
 
 /**
@@ -145,7 +146,7 @@ var ghosts = [
 	corner: "top-left"
 	}
 ]
-var speed = 200;
+var speed = 300;
 var pacLoop;
 var ghostLoop;
 function runnerStart(){
@@ -167,7 +168,7 @@ function runnerStart(){
 				world[pacman.y][pacman.x] = EMPTY;
 				score++;
 				coinsRemaining--;
-				displayWorld();
+				removeCoin(pacman.x,pacman.y);
 				updateScore();
 			}
 			setTimeout(function(){
@@ -319,6 +320,12 @@ function displayWorld(){
 				$('.row:last-child').append('<div class="empty"></div>');
 		}
 	}
+}
+
+function removeCoin(x,y){
+	var i = (x+1)*(y+1)
+	$("#world .row:nth-child("+ (y+1) +") div:nth-child("+ (x+1) +")").removeClass();
+	$("#world .row:nth-child("+ (y+1) +") div:nth-child("+ (x+1) +")").addClass("empty");
 }
 
 function displayPacman(){
