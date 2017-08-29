@@ -25,6 +25,20 @@ var EMPTY = 0;
 
 var world;
 var levels = [
+	{
+		world:[
+		[2,2,2,2,2,2,2,2,2,2],
+		[1,1,1,1,1,1,1,1,1,1],
+		[2,2,2,2,2,2,2,2,2,2]
+		],
+		pacman_location: [1,1],
+		pacman_direction: "right",
+		inky_location: [8,1],
+		inky_direction: "left"
+	},
+	
+	
+	
 	{	world:[
 			[2,2,2,2,2,1,2,2,2,2,2],
 			[2,0,1,1,1,1,1,1,1,1,2],
@@ -43,15 +57,15 @@ var levels = [
 		[2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2],
 		[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
 		[2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,1,2,2,2,2,2,2,2,1,2],
-		[2,1,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,2],
+		[2,1,1,1,1,1,1,1,1,1,2,0,0,0,2,1,1,1,1,1,1,1,1,1,2],
 		[2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2],
 		[2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2],
 		[1,1,1,1,2,2,1,2,2,1,2,2,1,2,2,1,2,2,1,2,2,1,1,1,1],
 		[2,2,2,1,2,2,1,2,2,1,2,2,0,2,2,1,2,2,1,2,2,1,2,2,2],
-		[2,2,2,1,1,1,1,2,2,1,2,2,2,2,2,1,2,2,1,1,1,1,2,2,2],
-		[2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2],
+		[0,0,2,1,1,1,1,2,2,1,2,2,2,2,2,1,2,2,1,1,1,1,2,0,0],
+		[0,0,2,2,2,2,2,2,2,1,1,1,1,1,1,1,2,2,2,2,2,2,2,0,0],
 		[2,2,2,1,1,1,1,2,2,2,1,2,2,2,1,2,2,2,1,1,1,1,2,2,2],
-		[2,1,1,1,2,2,1,1,1,2,1,2,2,2,1,2,1,1,1,2,2,1,1,1,2],
+		[2,1,1,1,2,2,1,1,1,2,1,2,0,2,1,2,1,1,1,2,2,1,1,1,2],
 		[2,1,2,2,2,2,2,2,1,2,1,2,2,2,1,2,1,2,2,2,2,2,2,1,2],
 		[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
 		[2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2]
@@ -63,6 +77,7 @@ var levels = [
 
 var score = 0;
 var level = 0;
+var lives = 3;
 var coinsRemaining = 0;
 var pacman = {
 	direction: "right",
@@ -129,11 +144,7 @@ function runnerStart(){
 			},10);//give slight delay so pacman will move first before anouncing
 			setTimeout(function(){
 				if(pacman.x==ghosts[0].x && pacman.y == ghosts[0].y){
-					alert("Game Over!")
-					clearInterval(pacLoop);
-					clearInterval(ghostLoop);
-					$('#pause').css('background', "orange");
-					$('#start').css('background', "blue");
+					death();
 				}
 			},10)
 		}
@@ -141,7 +152,6 @@ function runnerStart(){
 	
 	
 	setTimeout(function(){
-	
 	ghostLoop = setInterval(function(){
 		directions=[]
 		if (canMove(ghosts[0], "right"))
@@ -159,7 +169,6 @@ function runnerStart(){
 			var dir = directions[Math.floor(Math.random()*directions.length)];
 			ghosts[0].direction = dir;
 		} //smarter random picking
-		console.log(directions, dir)
 		
 		if(ghosts[0].direction == "right"){
 				ghosts[0].x = getLocation(++ghosts[0].x, ghosts[0].y)[0];
@@ -177,15 +186,10 @@ function runnerStart(){
 		
 		setTimeout(function(){
 				if(pacman.x==ghosts[0].x && pacman.y == ghosts[0].y){
-					alert("Game Over!")
-					clearInterval(pacLoop);
-					clearInterval(ghostLoop);
-					$('#pause').css('background', "orange");
-					$('#start').css('background', "blue");
+					death();
 				}
 			},10)
 	},speed)
-	
 	},50)
 };
 
@@ -246,7 +250,13 @@ function getLocation(x,y){
 function updateScore(){
 	$('#score').text("Score: "+score);
 }
-
+function updateLives(){
+	$('#lives').html('');
+	for (var i = 0; i<lives; i++)
+	{
+		$('#lives').append('<div class="life"></div>');
+	}
+}
 function setUpGame(lv){
 	level = lv;
 	world = levels[level].world;
@@ -258,14 +268,38 @@ function setUpGame(lv){
 	ghosts[0].y = levels[level].inky_location[1];
 	$('h3').text("Level: " + level);
 	
+	
+	
+	
 	displayWorld();
 	displayPacman();
 	displayGhosts();
 	updateScore();
+	updateLives();
 	coinsRemaining = $('.coin').length;
 }
 
-
+function death(){
+	lives--;
+	updateLives();
+	pacman.direction = levels[level].pacman_direction;
+	pacman.x = levels[level].pacman_location[0];
+	pacman.y = levels[level].pacman_location[1];
+	ghosts[0].direction = levels[level].inky_direction;
+	ghosts[0].x = levels[level].inky_location[0];
+	ghosts[0].y = levels[level].inky_location[1];
+	
+	
+	
+	if(lives == 0){
+		alert("Game Over!")
+		clearInterval(pacLoop);
+		clearInterval(ghostLoop);
+		$('#pause').css('background', "orange");
+		$('#start').css('background', "blue");		
+	}
+	
+}
 $(document).ready(function(){
 	$(document).on("keydown", function(e){
 		var key = event.which || event.keyCode;

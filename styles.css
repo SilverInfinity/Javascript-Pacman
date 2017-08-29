@@ -39,6 +39,17 @@
 	width: 20px;
 	height: 20px;
 }
+#lives{
+	
+}
+	.life{
+		background: url("pacman.gif") no-repeat center;
+		background-size: contain;
+		width: 20px;
+		height: 20px;
+		display: inline-block;
+}
+
 .inky{
 	background: url("inky.gif") no-repeat center;
 	background-size: contain;
