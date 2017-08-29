@@ -64,6 +64,13 @@
 	width: 20px;
 	height: 20px;
 }
+.pinky{
+	background: url("pinky.gif") no-repeat center;
+	background-size: contain;
+	position: absolute;
+	width: 20px;
+	height: 20px;
+}
 .empty{
 	
 }

@@ -1,14 +1,16 @@
 /**
 *	STUFF TO IMPLEMENT
 * ----------------------------
+*  
 *  More Ghosts
 *  More Levels
 *  Fruit (game apear after so many dots are eaten)
 *  big dot things that let you eat ghosts
+*  flip pacman in the direction he is going
 *
-*  Random Levels
+*  Random Levels?
 *  Ghost AI
-*  Ghost Modes
+*  Blinky's chase
 *  Better documentation
 **/
 
@@ -27,34 +29,6 @@ var world = [];
 var levels = [
 	{
 		world:[
-		[2,2,2,2,2,2,2,2,2,2],
-		[1,1,1,1,1,1,1,1,1,1],
-		[2,2,2,2,2,2,2,2,2,2]
-		],
-		pacman_location: [1,1],
-		pacman_direction: "right",
-		blinky_location: [8,1],
-		blinky_direction: "left"
-	},
-	
-	
-	
-	{	world:[
-			[2,2,2,2,2,1,2,2,2,2,2],
-			[2,0,1,1,1,1,1,1,1,1,2],
-			[2,1,2,2,2,2,2,2,2,1,2],
-			[2,1,2,1,1,2,1,1,2,1,2],
-			[1,1,2,1,1,1,1,1,2,1,1],
-			[2,1,2,2,1,1,1,2,2,1,2],
-			[2,1,2,2,2,1,2,2,2,1,2],
-			[2,1,1,1,1,1,1,1,1,1,2],
-			[2,2,2,2,2,1,2,2,2,2,2]],
-		pacman_location: [1,1],
-		blinky_location: [5,5],
-		blinky_direction: "down"
-	},
-	{
-		world:[
 			[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
 			[2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2],
 			[2,1,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,1,2],
@@ -71,7 +45,7 @@ var levels = [
 			[2,2,2,2,2,1,2,1,2,2,2,2,2,2,2,1,2,1,2,2,2,2,2],
 			[2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2],
 			[2,1,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,1,2],
-			[2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,2],
+			[2,1,1,1,2,1,1,1,1,1,1,0,1,1,1,1,1,1,2,1,1,1,2],
 			[2,2,2,1,2,1,2,1,2,2,2,2,2,2,2,1,2,1,2,1,2,2,2],
 			[2,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,2],
 			[2,1,2,2,2,2,2,2,2,2,1,2,1,2,2,2,2,2,2,2,2,1,2],
@@ -80,7 +54,9 @@ var levels = [
 		],
 		blinky_location:[11,8],
 		blinky_direction: "left",
-		pacman_location: [11,16]
+		pacman_location: [11,16],
+		pinky_location: [11,10],
+		pinky_direction: "up",
 		
 	},
 	{	world: [
@@ -90,8 +66,8 @@ var levels = [
 		[2,1,1,1,1,1,1,1,1,1,2,0,0,0,2,1,1,1,1,1,1,1,1,1,2],
 		[2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2],
 		[2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2],
-		[1,1,1,1,2,2,1,2,2,1,2,2,1,2,2,1,2,2,1,2,2,1,1,1,1],
-		[2,2,2,1,2,2,1,2,2,1,2,2,0,2,2,1,2,2,1,2,2,1,2,2,2],
+		[1,1,1,1,2,2,1,2,2,1,2,2,0,2,2,1,2,2,1,2,2,1,1,1,1],
+		[2,2,2,1,2,2,1,2,2,1,2,0,0,0,2,1,2,2,1,2,2,1,2,2,2],
 		[0,0,2,1,1,1,1,2,2,1,2,2,2,2,2,1,2,2,1,1,1,1,2,0,0],
 		[0,0,2,2,2,2,2,2,2,1,1,1,1,1,1,1,2,2,2,2,2,2,2,0,0],
 		[2,2,2,1,1,1,1,2,2,2,1,2,2,2,1,2,2,2,1,1,1,1,2,2,2],
@@ -100,16 +76,48 @@ var levels = [
 		[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
 		[2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2]
 		],
-		blinky_location: [12,7],
-		blinky_direction: "up",
-		pacman_location: [1,1]
-	}];
+		blinky_location: [12,5],
+		blinky_direction: "left",
+		pacman_location: [1,1],
+		pinky_location: [12,7],
+		pinky_direction: "up",
+	},
+	{	
+		world:[
+		[2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,2,1,2,0,0,0,0,0,2,1,2,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2],
+		[2,1,1,1,1,1,1,1,1,1,2,0,0,0,0,2,1,2,0,0,0,0,0,2,1,2,0,0,0,0,2,1,1,1,1,1,1,1,1,1,2],
+		[2,1,2,2,2,2,2,2,2,1,2,0,2,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,0,2,1,2,2,2,2,2,2,2,1,2],
+		[2,1,2,0,0,2,0,0,2,1,2,0,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,0,2,1,2,0,0,2,0,0,2,1,2],
+		[2,1,2,0,0,0,0,0,2,1,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,1,2,0,0,0,0,0,2,1,2],
+		[2,1,2,2,0,0,0,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,0,0,0,2,2,1,2],
+		[2,1,2,2,2,0,2,2,2,1,2,2,2,2,1,2,2,2,2,2,1,2,2,2,2,2,1,2,2,2,2,1,2,2,2,0,2,2,2,1,2],
+		[2,1,2,2,2,2,2,2,2,1,2,0,0,2,1,1,1,1,1,1,0,1,1,1,1,1,1,2,0,0,2,1,2,2,2,2,2,2,2,1,2],
+		[2,1,1,1,1,1,1,1,1,1,2,0,0,2,1,2,2,2,2,2,0,2,2,2,2,2,1,2,0,0,2,1,1,1,1,1,1,1,1,1,2],
+		[2,2,1,2,2,2,2,2,2,1,2,0,0,2,1,2,2,2,0,0,0,0,0,2,2,2,1,2,0,0,2,1,2,2,2,2,2,2,1,2,2],
+		[1,1,1,1,1,1,1,1,1,1,2,0,0,2,1,2,2,2,2,2,2,2,2,2,2,2,1,2,0,0,2,1,1,1,1,1,1,1,1,1,1],
+		[2,2,2,2,2,2,2,2,2,1,2,0,0,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,0,0,2,1,2,2,2,2,2,2,2,2,2],
+		[2,1,1,1,1,1,1,1,2,1,2,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,1,2,1,1,1,1,1,1,1,2],
+		[2,1,2,2,2,2,2,1,2,1,2,0,0,0,2,1,1,1,1,1,0,1,1,1,1,1,2,0,0,0,2,1,2,1,2,2,2,2,2,1,2],
+		[2,1,2,0,0,0,2,1,2,1,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,1,2,1,2,0,0,0,2,1,2],
+		[2,1,2,0,0,0,2,1,1,1,1,1,1,1,1,1,2,0,0,0,0,0,0,0,2,1,1,1,1,1,1,1,1,1,2,0,0,0,2,1,2],
+		[2,1,2,0,0,0,2,1,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,1,2,0,0,0,2,1,2],
+		[2,1,2,2,2,2,2,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,2,2,2,2,1,2],
+		[2,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,2],
+		[2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,2,1,2,0,0,0,0,0,2,1,2,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2]
+	],
+		pacman_location: [20,13],
+		blinky_location: [20,7],
+		blinky_direction: "down",
+		pinky_location: [20,9],
+		pinky_direction: "down"
+	}
+	];
 
 var score = 0;
 var level = 0;
 var lives = 3;
 var running = false;
-gameTime = 0;
+var gameTime = 0;
 
 var coinsRemaining = 0;
 var pacman = {
@@ -127,14 +135,21 @@ var ghosts = [
 	y: 5,
 	mode: "chase",
 	corner: "top-right"
+	},
+	{	
+	name: "pinky",
+	direction: "right",
+	x: 5,
+	y: 5,
+	mode: "chase",
+	corner: "top-left"
 	}
 ]
-var speed = 300;
+var speed = 200;
 var pacLoop;
 var ghostLoop;
 function runnerStart(){
 	running = true;
-	console.log("runner start");
 	pacLoop = setInterval(function(){
 		if (pacman.turn){
 			if(canMove(pacman, pacman.nextDirection)){
@@ -176,7 +191,7 @@ function runnerStart(){
 	setTimeout(function(){
 		ghostLoop = setInterval(function(){
 		for(var i = 0; i<ghosts.length; i++){
-			directions=[];
+			var directions=[];
 			if (ghosts[i].direction != "left" && canMove(ghosts[i], "right"))
 				directions.push("right");
 			if(ghosts[i].direction != "right" && canMove(ghosts[i], "left"))
@@ -186,7 +201,6 @@ function runnerStart(){
 			if(ghosts[i].direction != "up" && canMove(ghosts[i],"down"))
 				directions.push("down");
 			// get all valid directions that is not backwards
-			console.log(directions);
 			
 			if(ghosts[i].mode != "frightened" && gameTime%50 == 0){//not sure how to determine when to switch yet
 				if(ghosts[i].mode == "chase")
@@ -202,16 +216,13 @@ function runnerStart(){
 					ghosts[i].direction = "left";
 				else if(ghosts[i].direction == "left")
 					ghosts[i].direction = "right";
-				console.log(i,"mode switch",ghosts[i].mode);
 				
 			}//change mode every 20 seconds? go backwards the first time
 			
 			else if(ghosts[i].mode == "frightened"){
 				//pick a random direction from that list
-				console.log(i, "frightened ghost")
 				var dir = directions[Math.floor(Math.random()*directions.length)];
 				ghosts[i].direction = dir;
-				console.log(dir);
 			}
 			
 			else if(ghosts[i].mode == "chase"){
@@ -237,8 +248,8 @@ function runnerStart(){
 				}//end blinky algorithm
 			}
 			//else if scatter
-			else if(ghosts[i].mode = "scatter"){
-				if(ghosts[i].name = "blinky"){
+			else if(ghosts[i].mode == "scatter"){
+				if(ghosts[i].name == "blinky"){
 					if(directions.length>1){
 						var bestD = 10000000;
 						var best;
@@ -255,9 +266,26 @@ function runnerStart(){
 					else //if only 1 direction to go
 						ghosts[i].direction = directions[0];
 					
-				}	
+				}
+				if(ghosts[i].name == "pinky"){
+					if(directions.length>1){
+						var bestD = 10000000;
+						var best;
+						for (var j = 0; j<directions.length; j++){
+							var loc = getLocationInDirection(ghosts[i].x,ghosts[i].y,directions[j])
+							var locD = Math.sqrt(Math.pow(loc[0]-0,2)+Math.pow(loc[1]-0,2));
+							if(bestD > locD ){
+								best = j;
+								bestD = locD;
+							}
+						}
+						ghosts[i].direction = directions[best];
+					}
+					else //if only 1 direction to go
+						ghosts[i].direction = directions[0];
+					
+				}
 			}
-			console.log(ghosts[i].direction);
 			var loc = getLocationInDirection(ghosts[i].x,ghosts[i].y,ghosts[i].direction);
 			ghosts[i].x = loc[0];
 			ghosts[i].y = loc[1];
@@ -300,6 +328,9 @@ function displayPacman(){
 function displayGhosts(){
 	$('.blinky').css('top', ghosts[0].y*20);
 	$('.blinky').css('left', ghosts[0].x*20);
+	
+	$('.pinky').css('top', ghosts[1].y*20);
+	$('.pinky').css('left', ghosts[1].x*20);
 	
 }
 
@@ -363,9 +394,14 @@ function setUpGame(lv){
 	pacman.direction = levels[level].pacman_direction;
 	pacman.x = levels[level].pacman_location[0];
 	pacman.y = levels[level].pacman_location[1];
+	$('.blinky').show()
 	ghosts[0].direction = levels[level].blinky_direction;
 	ghosts[0].x = levels[level].blinky_location[0];
 	ghosts[0].y = levels[level].blinky_location[1];
+	
+	ghosts[1].x = levels[level].pinky_location[0];
+	ghosts[1].y = levels[level].pinky_location[1];
+	
 	$('h3').text("Level: " + level);
 	
 	$('#pause').css('background', "orange");
@@ -450,7 +486,8 @@ $(document).ready(function(){
 	});
 	
 	$('#world').after('<div class="pacman" direction="right" style="top: '+ pacman.y*20 +'px; left: '+ pacman.x*20 +'px; "></div>');
-	$('#world').after('<div class="ghost blinky" direction="right" style="top: '+ ghosts[0].y*20 +'px; left: '+ ghosts[0].x*20 +'px; "></div>');
+	$('#world').after('<div class="ghost blinky" style="top: '+ ghosts[0].y*20 +'px; left: '+ ghosts[0].x*20 +'px; "></div>');
+	$('#world').after('<div class="ghost pinky" style="top: '+ ghosts[1].y*20 +'px; left: '+ ghosts[1].x*20 +'px; "></div>');
 	setUpGame(0);
 
 });//end ready
