@@ -23,7 +23,7 @@ var BRICK = 2;
 var COIN = 1;
 var EMPTY = 0;
 
-var world;
+var world = [];
 var levels = [
 	{
 		world:[
@@ -132,14 +132,10 @@ function runnerStart(){
 			setTimeout(function(){
 				if(coinsRemaining == 0){
 					alert("you win!");
-					clearInterval(pacLoop);
-					clearInterval(ghostLoop);
 					if(level+1<levels.length)
 						setUpGame(++level);
 					else
 						setUpGame(level);
-					$('#pause').css('background', "orange");
-					$('#start').css('background', "blue");
 				}
 			},10);//give slight delay so pacman will move first before anouncing
 			setTimeout(function(){
@@ -258,8 +254,16 @@ function updateLives(){
 	}
 }
 function setUpGame(lv){
+	clearInterval(pacLoop);
+	clearInterval(ghostLoop);
+	
 	level = lv;
-	world = levels[level].world;
+	world = [];
+	for (var i = 0; i< levels[level].world.length; i++){
+		world.push([]);
+		for (var j = 0; j<levels[level].world[i].length; j++)
+			world[i].push(levels[level].world[i][j]);
+	}//clones the level
 	pacman.direction = levels[level].pacman_direction;
 	pacman.x = levels[level].pacman_location[0];
 	pacman.y = levels[level].pacman_location[1];
@@ -268,8 +272,8 @@ function setUpGame(lv){
 	ghosts[0].y = levels[level].inky_location[1];
 	$('h3').text("Level: " + level);
 	
-	
-	
+	$('#pause').css('background', "orange");
+	$('#start').css('background', "blue");
 	
 	displayWorld();
 	displayPacman();
@@ -295,8 +299,9 @@ function death(){
 		alert("Game Over!")
 		clearInterval(pacLoop);
 		clearInterval(ghostLoop);
-		$('#pause').css('background', "orange");
-		$('#start').css('background', "blue");		
+		$('#pause').css('background', "blue");
+		$('#start').css('background', "blue");
+		$('#pause, #start').hide();
 	}
 	
 }
@@ -334,7 +339,15 @@ $(document).ready(function(){
 		$(this).css('background', "orange");
 		$('#pause').css('background', "blue");
 	})
-	
+	$('#reset').on("click", function(){
+		clearInterval(pacLoop);
+		clearInterval(ghostLoop);
+		lives = 3;
+		level = 0;
+		score = 0;
+		setUpGame(level);
+		$('#start, #pause').show();
+	});
 	
 	
 	
