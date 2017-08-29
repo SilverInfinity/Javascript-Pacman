@@ -247,6 +247,24 @@ function runnerStart(){
 						ghosts[i].direction = directions[0];
 
 				}//end blinky algorithm
+				if(ghosts[i].name == "pinky"){
+					if(directions.length>1){
+						var bestD = 10000000;
+						var best;
+						var target = getLocationInDirection(pacman.x, pacman.y,pacman.direction, 4)
+						for (var j = 0; j<directions.length; j++){
+							var loc = getLocationInDirection(ghosts[i].x,ghosts[i].y,directions[j])
+							var locD = Math.sqrt(Math.pow(loc[0]-target[0],2)+Math.pow(loc[1]-target[1],2));
+							if(bestD > locD ){
+								best = j;
+								bestD = locD;
+							}
+						}
+						ghosts[i].direction = directions[best];
+					}
+					else //if only 1 direction to go
+						ghosts[i].direction = directions[0];
+				}//end pinky chase algorithm
 			}
 			//else if scatter
 			else if(ghosts[i].mode == "scatter"){
@@ -362,16 +380,19 @@ function getLocation(x,y){
 	return[x,y];
 }
 
-function getLocationInDirection(x,y,direction){
-	if (direction == "up")
-		y = getLocation(x,y-1)[1];
-	if(direction == "down")
-		y = getLocation(x,y+1)[1];
-	if(direction == "left")
-		x = getLocation(x-1,y)[0];
-	if(direction == "right")
-		x = getLocation(x+1,y)[0];
-	
+function getLocationInDirection(x,y,direction,num){
+	if (num == undefined)
+		num = 1;
+	for (var i = 0; i<num; i++){
+		if (direction == "up")
+			y = getLocation(x,y-1)[1];
+		if(direction == "down")
+			y = getLocation(x,y+1)[1];
+		if(direction == "left")
+			x = getLocation(x-1,y)[0];
+		if(direction == "right")
+			x = getLocation(x+1,y)[0];
+	}	
 	return[x,y]
 }
 
