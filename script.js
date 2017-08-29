@@ -1,11 +1,10 @@
 /**
 *	STUFF TO IMPLEMENT
 * ----------------------------
-*  Lives
+*  Make it so you cant press start twice
 *  More Ghosts
 *  More Levels
-*  Increment Level upon win
-*  Fruit (gameapear after so many dots are eaten)
+*  Fruit (game apear after so many dots are eaten)
 *  
 *
 *  Random Levels
@@ -349,14 +348,8 @@ $(document).ready(function(){
 		$('#start, #pause').show();
 	});
 	
-	
-	
 	$('#world').after('<div class="pacman" direction="right" style="top: '+ pacman.y*20 +'px; left: '+ pacman.x*20 +'px; "></div>');
 	$('#world').after('<div class="ghost inky" direction="right" style="top: '+ ghosts[0].y*20 +'px; left: '+ ghosts[0].x*20 +'px; "></div>');
 	setUpGame(0);
-	
 
-
-	
-	
 });//end ready
