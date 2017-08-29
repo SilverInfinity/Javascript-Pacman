@@ -53,6 +53,36 @@ var levels = [
 		blinky_location: [5,5],
 		blinky_direction: "down"
 	},
+	{
+		world:[
+			[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+			[2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2],
+			[2,1,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,1,2],
+			[2,1,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,1,2],
+			[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
+			[2,1,2,2,2,1,2,1,2,2,2,2,2,2,2,1,2,1,2,2,2,1,2],
+			[2,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,2],
+			[2,2,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,2,2],
+			[0,0,0,0,2,1,2,1,1,1,1,0,1,1,1,1,2,1,2,0,0,0,0],
+			[2,2,2,2,2,1,2,1,2,2,2,0,2,2,2,1,2,1,2,2,2,2,2],
+			[1,1,1,1,1,1,1,1,2,0,0,0,0,0,2,1,1,1,1,1,1,1,1],
+			[2,2,2,2,2,1,2,1,2,2,2,2,2,2,2,1,2,1,2,2,2,2,2],
+			[0,0,0,0,2,1,2,1,1,1,1,1,1,1,1,1,2,1,2,0,0,0,0],
+			[2,2,2,2,2,1,2,1,2,2,2,2,2,2,2,1,2,1,2,2,2,2,2],
+			[2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2],
+			[2,1,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,1,2],
+			[2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,2],
+			[2,2,2,1,2,1,2,1,2,2,2,2,2,2,2,1,2,1,2,1,2,2,2],
+			[2,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,2],
+			[2,1,2,2,2,2,2,2,2,2,1,2,1,2,2,2,2,2,2,2,2,1,2],
+			[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
+			[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+		],
+		blinky_location:[11,8],
+		blinky_direction: "left",
+		pacman_location: [11,16]
+		
+	},
 	{	world: [
 		[2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2],
 		[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
@@ -79,6 +109,8 @@ var score = 0;
 var level = 0;
 var lives = 3;
 var running = false;
+gameTime = 0;
+
 var coinsRemaining = 0;
 var pacman = {
 	direction: "right",
@@ -93,7 +125,8 @@ var ghosts = [
 	direction: "right",
 	x: 5,
 	y: 5,
-	mode: "chase"
+	mode: "chase",
+	corner: "top-right"
 	}
 ]
 var speed = 300;
@@ -110,18 +143,9 @@ function runnerStart(){
 			}
 		}//if can turn, turn
 		if(canMove(pacman, pacman.direction)){	
-			if(pacman.direction == "right"){
-				pacman.x = getLocation(++pacman.x, pacman.y)[0];
-			}
-			if(pacman.direction == "left"){
-				pacman.x = getLocation(--pacman.x, pacman.y)[0];
-			}
-			if(pacman.direction == "up"){
-				pacman.y = getLocation(pacman.x, --pacman.y)[1];
-			}
-			if(pacman.direction == "down"){
-				pacman.y = getLocation(pacman.x, ++pacman.y)[1];
-			}
+			var loc = getLocationInDirection(pacman.x,pacman.y,pacman.direction)
+			pacman.x = loc[0];
+			pacman.y = loc[1];
 			
 			displayPacman();
 			if(world[pacman.y][pacman.x] == COIN){
@@ -150,44 +174,106 @@ function runnerStart(){
 	
 	
 	setTimeout(function(){
-	ghostLoop = setInterval(function(){
-		directions=[]
-		if (canMove(ghosts[0], "right"))
-			directions.push("right");
-		if(canMove(ghosts[0], "left"))
-			directions.push("left");
-		if(canMove(ghosts[0],"up"))
-			directions.push("up")
-		if(canMove(ghosts[0],"down"))
-			directions.push("down");
-		// pick random valid direction
-		
-		
-		if(directions.length>2 || !((directions[0]=="up"&&directions[1]=="down")||(directions[0]=="right" &&directions[1]=="left"))){
-			var dir = directions[Math.floor(Math.random()*directions.length)];
-			ghosts[0].direction = dir;
-		} //smarter random picking
-		
-		if(ghosts[0].direction == "right"){
-				ghosts[0].x = getLocation(++ghosts[0].x, ghosts[0].y)[0];
+		ghostLoop = setInterval(function(){
+		for(var i = 0; i<ghosts.length; i++){
+			directions=[];
+			if (ghosts[i].direction != "left" && canMove(ghosts[i], "right"))
+				directions.push("right");
+			if(ghosts[i].direction != "right" && canMove(ghosts[i], "left"))
+				directions.push("left");
+			if(ghosts[i].direction != "down" && canMove(ghosts[i],"up"))
+				directions.push("up")
+			if(ghosts[i].direction != "up" && canMove(ghosts[i],"down"))
+				directions.push("down");
+			// get all valid directions that is not backwards
+			console.log(directions);
+			
+			if(ghosts[i].mode != "frightened" && gameTime%50 == 0){//not sure how to determine when to switch yet
+				if(ghosts[i].mode == "chase")
+					ghosts[i].mode = "scatter";
+				else if(ghosts[i].mode == "scatter")
+					ghosts[i].mode = "chase";
+				
+				if(ghosts[i].direction == "up")
+					ghosts[i].direction = "down";
+				else if(ghosts[i].direction == "down")
+					ghosts[i].direction = "up";
+				else if(ghosts[i].direction == "right")
+					ghosts[i].direction = "left";
+				else if(ghosts[i].direction == "left")
+					ghosts[i].direction = "right";
+				console.log(i,"mode switch",ghosts[i].mode);
+				
+			}//change mode every 20 seconds? go backwards the first time
+			
+			else if(ghosts[i].mode == "frightened"){
+				//pick a random direction from that list
+				console.log(i, "frightened ghost")
+				var dir = directions[Math.floor(Math.random()*directions.length)];
+				ghosts[i].direction = dir;
+				console.log(dir);
 			}
-		if(ghosts[0].direction == "left"){
-				ghosts[0].x = getLocation(--ghosts[0].x, ghosts[0].y)[0];
+			
+			else if(ghosts[i].mode == "chase"){
+				if (ghosts[i].name == "blinky")
+				{
+					
+					if(directions.length>1){
+						var bestD = 10000000;
+						var best;
+						for (var j = 0; j<directions.length; j++){
+							var loc = getLocationInDirection(ghosts[i].x,ghosts[i].y,directions[j])
+							var locD = Math.sqrt(Math.pow(loc[0]-pacman.x,2)+Math.pow(loc[1]-pacman.y,2));
+							if(bestD > locD ){
+								best = j;
+								bestD = locD;
+							}
+						}
+						ghosts[i].direction = directions[best];
+					}
+					else //if only 1 direction to go
+						ghosts[i].direction = directions[0];
+
+				}//end blinky algorithm
 			}
-		if(ghosts[0].direction == "up"){
-				ghosts[0].y = getLocation(ghosts[0].x, --ghosts[0].y)[1];
+			//else if scatter
+			else if(ghosts[i].mode = "scatter"){
+				if(ghosts[i].name = "blinky"){
+					if(directions.length>1){
+						var bestD = 10000000;
+						var best;
+						for (var j = 0; j<directions.length; j++){
+							var loc = getLocationInDirection(ghosts[i].x,ghosts[i].y,directions[j])
+							var locD = Math.sqrt(Math.pow(loc[0]-world[0].length,2)+Math.pow(loc[1]-0,2));
+							if(bestD > locD ){
+								best = j;
+								bestD = locD;
+							}
+						}
+						ghosts[i].direction = directions[best];
+					}
+					else //if only 1 direction to go
+						ghosts[i].direction = directions[0];
+					
+				}	
 			}
-		if(ghosts[0].direction == "down"){
-				ghosts[0].y = getLocation(ghosts[0].x, ++ghosts[0].y)[1];
-			}
-		displayGhosts();
-		
+			console.log(ghosts[i].direction);
+			var loc = getLocationInDirection(ghosts[i].x,ghosts[i].y,ghosts[i].direction);
+			ghosts[i].x = loc[0];
+			ghosts[i].y = loc[1];
+			
+		}//end ghost for loop
 		setTimeout(function(){
-				if(pacman.x==ghosts[0].x && pacman.y == ghosts[0].y){
-					death();
+			for (var i = 0; i<ghosts.length; i++){
+				if(pacman.x==ghosts[i].x && pacman.y == ghosts[i].y){
+				death();
 				}
-			},10)
-	},speed)
+			}
+		},10)
+		gameTime++
+		console.log(gameTime);
+		displayGhosts();
+		},speed)
 	},50)
 };
 
@@ -218,15 +304,8 @@ function displayGhosts(){
 }
 
 function canMove(actor,direction){ //actor> obj, direction>string
-	
-	
-	if (direction == "right" && world[getLocation(actor.x+1,actor.y)[1]][getLocation(actor.x+1,actor.y)[0]] == BRICK)
-		return false;
-	else if(direction == "left" && world[getLocation(actor.x-1,actor.y)[1]][getLocation(actor.x-1,actor.y)[0]] == BRICK)
-		return false;
-	else if (direction == "up" && world[getLocation(actor.x,actor.y-1)[1]][getLocation(actor.x,actor.y-1)[0]] == BRICK)
-		return false;
-	else if (direction == "down" && world[getLocation(actor.x,actor.y+1)[1]][getLocation(actor.x,actor.y+1)[0]] == BRICK)
+	var loc = getLocationInDirection(actor.x, actor.y,direction)
+	if(world[loc[1]][loc[0]] == BRICK)
 		return false;
 	
 	return true;
@@ -245,6 +324,19 @@ function getLocation(x,y){
 	return[x,y];
 }
 
+function getLocationInDirection(x,y,direction){
+	if (direction == "up")
+		y = getLocation(x,y-1)[1];
+	if(direction == "down")
+		y = getLocation(x,y+1)[1];
+	if(direction == "left")
+		x = getLocation(x-1,y)[0];
+	if(direction == "right")
+		x = getLocation(x+1,y)[0];
+	
+	return[x,y]
+}
+
 function updateScore(){
 	$('#score').text("Score: "+score);
 }
@@ -257,6 +349,7 @@ function updateLives(){
 }
 function setUpGame(lv){
 	running = false;
+	gameTime = 0;
 	clearInterval(pacLoop);
 	clearInterval(ghostLoop);
 	
