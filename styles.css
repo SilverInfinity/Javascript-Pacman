@@ -57,6 +57,13 @@
 	width: 20px;
 	height: 20px;
 }
+.blinky{
+	background: url("blinky.gif") no-repeat center;
+	background-size: contain;
+	position: absolute;
+	width: 20px;
+	height: 20px;
+}
 .empty{
 	
 }

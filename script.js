@@ -1,14 +1,15 @@
 /**
 *	STUFF TO IMPLEMENT
 * ----------------------------
-*  Make it so you cant press start twice
 *  More Ghosts
 *  More Levels
 *  Fruit (game apear after so many dots are eaten)
-*  
+*  big dot things that let you eat ghosts
 *
 *  Random Levels
 *  Ghost AI
+*  Ghost Modes
+*  Better documentation
 **/
 
 /**
@@ -32,8 +33,8 @@ var levels = [
 		],
 		pacman_location: [1,1],
 		pacman_direction: "right",
-		inky_location: [8,1],
-		inky_direction: "left"
+		blinky_location: [8,1],
+		blinky_direction: "left"
 	},
 	
 	
@@ -49,8 +50,8 @@ var levels = [
 			[2,1,1,1,1,1,1,1,1,1,2],
 			[2,2,2,2,2,1,2,2,2,2,2]],
 		pacman_location: [1,1],
-		inky_location: [5,5],
-		inky_direction: "down"
+		blinky_location: [5,5],
+		blinky_direction: "down"
 	},
 	{	world: [
 		[2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2],
@@ -69,14 +70,15 @@ var levels = [
 		[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
 		[2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2]
 		],
-		inky_location: [12,7],
-		inky_direction: "up",
+		blinky_location: [12,7],
+		blinky_direction: "up",
 		pacman_location: [1,1]
 	}];
 
 var score = 0;
 var level = 0;
 var lives = 3;
+var running = false;
 var coinsRemaining = 0;
 var pacman = {
 	direction: "right",
@@ -87,7 +89,7 @@ var pacman = {
 }
 var ghosts = [
 	{	
-	name: "inky",
+	name: "blinky",
 	direction: "right",
 	x: 5,
 	y: 5,
@@ -98,7 +100,8 @@ var speed = 300;
 var pacLoop;
 var ghostLoop;
 function runnerStart(){
-	
+	running = true;
+	console.log("runner start");
 	pacLoop = setInterval(function(){
 		if (pacman.turn){
 			if(canMove(pacman, pacman.nextDirection)){
@@ -209,8 +212,8 @@ function displayPacman(){
 	$('.pacman').css("left", pacman.x*20);
 }
 function displayGhosts(){
-	$('.inky').css('top', ghosts[0].y*20);
-	$('.inky').css('left', ghosts[0].x*20);
+	$('.blinky').css('top', ghosts[0].y*20);
+	$('.blinky').css('left', ghosts[0].x*20);
 	
 }
 
@@ -253,6 +256,7 @@ function updateLives(){
 	}
 }
 function setUpGame(lv){
+	running = false;
 	clearInterval(pacLoop);
 	clearInterval(ghostLoop);
 	
@@ -266,9 +270,9 @@ function setUpGame(lv){
 	pacman.direction = levels[level].pacman_direction;
 	pacman.x = levels[level].pacman_location[0];
 	pacman.y = levels[level].pacman_location[1];
-	ghosts[0].direction = levels[level].inky_direction;
-	ghosts[0].x = levels[level].inky_location[0];
-	ghosts[0].y = levels[level].inky_location[1];
+	ghosts[0].direction = levels[level].blinky_direction;
+	ghosts[0].x = levels[level].blinky_location[0];
+	ghosts[0].y = levels[level].blinky_location[1];
 	$('h3').text("Level: " + level);
 	
 	$('#pause').css('background', "orange");
@@ -288,14 +292,15 @@ function death(){
 	pacman.direction = levels[level].pacman_direction;
 	pacman.x = levels[level].pacman_location[0];
 	pacman.y = levels[level].pacman_location[1];
-	ghosts[0].direction = levels[level].inky_direction;
-	ghosts[0].x = levels[level].inky_location[0];
-	ghosts[0].y = levels[level].inky_location[1];
+	ghosts[0].direction = levels[level].blinky_direction;
+	ghosts[0].x = levels[level].blinky_location[0];
+	ghosts[0].y = levels[level].blinky_location[1];
 	
 	
 	
 	if(lives == 0){
 		alert("Game Over!")
+		running = false;
 		clearInterval(pacLoop);
 		clearInterval(ghostLoop);
 		$('#pause').css('background', "blue");
@@ -327,6 +332,7 @@ $(document).ready(function(){
 	});
 	
 	$('#pause').on("click", function(){
+		running = false;
 		clearInterval(pacLoop);
 		clearInterval(ghostLoop);
 		$(this).css('background', "orange");
@@ -334,11 +340,13 @@ $(document).ready(function(){
 		
 	});
 	$('#start').on("click",function(){
-		runnerStart();
+		if(!running)
+			runnerStart();
 		$(this).css('background', "orange");
 		$('#pause').css('background', "blue");
 	})
 	$('#reset').on("click", function(){
+		running = false;
 		clearInterval(pacLoop);
 		clearInterval(ghostLoop);
 		lives = 3;
@@ -349,7 +357,7 @@ $(document).ready(function(){
 	});
 	
 	$('#world').after('<div class="pacman" direction="right" style="top: '+ pacman.y*20 +'px; left: '+ pacman.x*20 +'px; "></div>');
-	$('#world').after('<div class="ghost inky" direction="right" style="top: '+ ghosts[0].y*20 +'px; left: '+ ghosts[0].x*20 +'px; "></div>');
+	$('#world').after('<div class="ghost blinky" direction="right" style="top: '+ ghosts[0].y*20 +'px; left: '+ ghosts[0].x*20 +'px; "></div>');
 	setUpGame(0);
 
 });//end ready
