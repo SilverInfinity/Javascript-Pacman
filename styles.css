@@ -103,3 +103,19 @@ button{
 	margin-top: 20px;
 	padding: 0px 5px;
 }
+#game{
+	display: inline-block;
+	vertical-align: top;
+	width: 50%;
+}
+#TouchButtons{
+	display: inline-block;
+	vertical-align: top;
+	width: 30%;
+	text-align: center;
+	}
+#up, #down,#left,#right{
+	padding: 2vh 2vw;
+	font-size: 2em;
+	width: 10vw;
+}

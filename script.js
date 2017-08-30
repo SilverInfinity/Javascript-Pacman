@@ -4,7 +4,6 @@
 *  More Levels
 *  Fruit (game apear after 70/170 many dots are eaten)
 *  Ghost entry conditions
-*  flip pacman in the direction he is going
 *
 *  Random Levels?
 **/
@@ -980,6 +979,44 @@ $(document).ready(function(){
 		game.reset();
 		$('#start, #pause').show();
 	});
+	$('#up').on("click", function(){
+		pacman.nextDirection = "up";
+		$(this).css('background', "orange");
+		$(' #down, #left, #right').css('background', "blue");
+		if(pacman.nextDirection !== pacman.direction)
+			pacman.turn = true;
+		else
+			pacman.turn = false;
+		
+	});
+	$('#down').on("click", function(){
+		pacman.nextDirection = "down";
+		$('#up, #left, #right').css('background', "blue");
+		$(this).css('background', "orange");
+		if(pacman.nextDirection !== pacman.direction)
+			pacman.turn = true;
+		else
+			pacman.turn = false;
+	});
+	$('#left').on("click", function(){
+		pacman.nextDirection = "left";
+		$('#up, #down, #right').css('background', "blue");
+		$(this).css('background', "orange");
+		if(pacman.nextDirection !== pacman.direction)
+			pacman.turn = true;
+		else
+			pacman.turn = false;
+	});
+	$('#right').on("click", function(){
+		pacman.nextDirection = "right";
+		$('#up, #down, #left').css('background', "blue");
+		$(this).css('background', "orange");
+		if(pacman.nextDirection !== pacman.direction)
+			pacman.turn = true;
+		else
+			pacman.turn = false;
+	});
+	
 	$('#world').after('<div class="pacman" direction="right" style="top: '+ pacman.y*20 +'px; left: '+ pacman.x*20 +'px; "></div>');
 	$('#world').after('<div class="ghost blinky" style="top: '+ blinky.y*20 +'px; left: '+ blinky.x*20 +'px; "></div>');
 	$('#world').after('<div class="ghost pinky" style="top: '+ pinky.y*20 +'px; left: '+ pinky.x*20 +'px; "></div>');
