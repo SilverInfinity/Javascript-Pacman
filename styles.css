@@ -71,8 +71,21 @@
 	width: 20px;
 	height: 20px;
 }
+.ghost.frightened{
+	background: url("frightened.gif") no-repeat center;
+	background-size: contain;
+	position: absolute;
+	width: 20px;
+	height: 20px;
+}
 .empty{
 	
+}
+.row .power{
+	background: white;
+	width: 10px;
+	height: 10px;
+	margin: 5px;
 }
 button{
 	font-weight: bold;

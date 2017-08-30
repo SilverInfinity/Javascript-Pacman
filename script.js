@@ -12,7 +12,6 @@
 *  Ghost AI
 *  Blinky's chase
 *  Better documentation
-*  refreshing the board (when you collect a coin) creates a lot of lag too many divs to build
 **/
 
 /**
@@ -24,6 +23,7 @@
 
 var BRICK = 2;
 var COIN = 1;
+var POWER = 3;
 var EMPTY = 0;
 
 var world = [];
@@ -31,7 +31,7 @@ var levels = [
 	{
 		world:[
 			[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
-			[2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2],
+			[2,3,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,3,2],
 			[2,1,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,1,2],
 			[2,1,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,1,2],
 			[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
@@ -50,7 +50,7 @@ var levels = [
 			[2,2,2,1,2,1,2,1,2,2,2,2,2,2,2,1,2,1,2,1,2,2,2],
 			[2,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,2],
 			[2,1,2,2,2,2,2,2,2,2,1,2,1,2,2,2,2,2,2,2,2,1,2],
-			[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
+			[2,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,2],
 			[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
 		],
 		blinky_location:[11,8],
@@ -135,7 +135,8 @@ var ghosts = [
 	x: 5,
 	y: 5,
 	mode: "chase",
-	corner: "top-right"
+	frightened: false,
+	frightCount: 0
 	},
 	{	
 	name: "pinky",
@@ -143,10 +144,13 @@ var ghosts = [
 	x: 5,
 	y: 5,
 	mode: "chase",
-	corner: "top-left"
+	frightened: false,
+	frightCount: 0
 	}
 ]
+
 var speed = 300;
+var ghostSpeed = 300;
 var pacLoop;
 var ghostLoop;
 function runnerStart(){
@@ -171,6 +175,21 @@ function runnerStart(){
 				removeCoin(pacman.x,pacman.y);
 				updateScore();
 			}
+			if(world[pacman.y][pacman.x] == POWER){
+				world[pacman.y][pacman.x] = EMPTY;
+				removeCoin(pacman.x,pacman.y);
+				console.log("frightened")
+				
+				
+				for (var i = 0; i<ghosts.length; i++){
+						$("."+ghosts[i].name).addClass("frightened");
+						ghosts[i].frightened = true;
+						ghosts[i].frightCount= 40;
+				}
+				
+			}
+			
+			
 			setTimeout(function(){
 				if(coinsRemaining == 0){
 					alert("you win!");
@@ -181,8 +200,20 @@ function runnerStart(){
 				}
 			},10);//give slight delay so pacman will move first before anouncing
 			setTimeout(function(){
-				if(pacman.x==ghosts[0].x && pacman.y == ghosts[0].y){
-					death();
+				for (var i = 0; i<ghosts.length; i++){
+				if(pacman.x==ghosts[i].x && pacman.y == ghosts[i].y){
+					if(ghosts[i].frightened){
+						//return ghost to pen, score ++100
+						ghosts[i].x = levels[level].pinky_location[0];
+						ghosts[i].y = levels[level].pinky_location[1];
+						score+= 100;
+						ghostSpeed = speed+200;
+						ghosts[i].frightened = false;
+					}
+						
+					else
+						death();
+				}
 				}
 			},10)
 		}
@@ -203,12 +234,17 @@ function runnerStart(){
 				directions.push("down");
 			// get all valid directions that is not backwards
 			
-			if(ghosts[i].mode != "frightened" && gameTime%50 == 0){//not sure how to determine when to switch yet
+			if((!ghosts[i].frightened && gameTime%50 == 0)||(ghosts[i].frightened && ghosts[i].frightCount == 0)){//not sure how to determine when to switch yet
+				ghostSpeed = speed;
+				$("."+ghosts[i].name).removeClass("frightened");
 				if(ghosts[i].mode == "chase")
 					ghosts[i].mode = "scatter";
 				else if(ghosts[i].mode == "scatter")
 					ghosts[i].mode = "chase";
 				
+				console.log(ghosts[i].mode)
+				
+				ghosts[i].frightened = false;
 				if(ghosts[i].direction == "up")
 					ghosts[i].direction = "down";
 				else if(ghosts[i].direction == "down")
@@ -220,10 +256,11 @@ function runnerStart(){
 				
 			}//change mode every 20 seconds? go backwards the first time
 			
-			else if(ghosts[i].mode == "frightened"){
+			else if(ghosts[i].frightened){
 				//pick a random direction from that list
 				var dir = directions[Math.floor(Math.random()*directions.length)];
 				ghosts[i].direction = dir;
+				ghosts[i].frightCount--;
 			}
 			
 			else if(ghosts[i].mode == "chase"){
@@ -318,9 +355,9 @@ function runnerStart(){
 			}
 		},10)
 		gameTime++
-		console.log(gameTime);
+		
 		displayGhosts();
-		},speed)
+		},ghostSpeed)
 	},50)
 };
 
@@ -333,7 +370,8 @@ function displayWorld(){
 				$('.row:last-child').append('<div class="brick"></div>');
 			if (world[r][c] == COIN)
 				$('.row:last-child').append('<div class="coin"></div>');
-			
+			if (world[r][c] == POWER)
+				$('.row:last-child').append('<div class="power"></div>');
 			if (world[r][c] == EMPTY)
 				$('.row:last-child').append('<div class="empty"></div>');
 		}
@@ -380,10 +418,10 @@ function getLocation(x,y){
 	return[x,y];
 }
 
-function getLocationInDirection(x,y,direction,num){
-	if (num == undefined)
-		num = 1;
-	for (var i = 0; i<num; i++){
+function getLocationInDirection(x,y,direction,distance){
+	if (distance == undefined)
+		distance = 1;
+	for (var i = 0; i<distance; i++){
 		if (direction == "up")
 			y = getLocation(x,y-1)[1];
 		if(direction == "down")
