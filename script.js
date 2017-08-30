@@ -2,7 +2,7 @@
 *	STUFF TO IMPLEMENT
 * ----------------------------
 *  More Levels
-*  Fruit (game apear after so many dots are eaten)
+*  Fruit (game apear after 70/170 many dots are eaten)
 *  Ghost entry conditions
 *  flip pacman in the direction he is going
 *
@@ -24,26 +24,26 @@ var leveldata = [
 	{
 	grid:[
 			[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
-			[2,3,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,3,2],
+			[2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2],
 			[2,1,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,1,2],
-			[2,1,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,1,2],
+			[2,3,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,3,2],
 			[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
 			[2,1,2,2,2,1,2,1,2,2,2,2,2,2,2,1,2,1,2,2,2,1,2],
 			[2,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,2],
 			[2,2,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,2,2],
 			[0,0,0,0,2,1,2,1,1,1,1,0,1,1,1,1,2,1,2,0,0,0,0],
 			[2,2,2,2,2,1,2,1,2,2,2,0,2,2,2,1,2,1,2,2,2,2,2],
-			[1,1,1,1,1,1,1,1,2,0,0,0,0,0,2,1,1,1,1,1,1,1,1],
+			[0,0,0,0,0,1,1,1,2,0,0,0,0,0,2,1,1,1,0,0,0,0,0],
 			[2,2,2,2,2,1,2,1,2,2,2,2,2,2,2,1,2,1,2,2,2,2,2],
 			[0,0,0,0,2,1,2,1,1,1,1,1,1,1,1,1,2,1,2,0,0,0,0],
 			[2,2,2,2,2,1,2,1,2,2,2,2,2,2,2,1,2,1,2,2,2,2,2],
 			[2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2],
 			[2,1,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,1,2],
-			[2,1,1,1,2,1,1,1,1,1,1,0,1,1,1,1,1,1,2,1,1,1,2],
+			[2,3,1,1,2,1,1,1,1,1,1,0,1,1,1,1,1,1,2,1,1,3,2],
 			[2,2,2,1,2,1,2,1,2,2,2,2,2,2,2,1,2,1,2,1,2,2,2],
 			[2,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,2],
 			[2,1,2,2,2,2,2,2,2,2,1,2,1,2,2,2,2,2,2,2,2,1,2],
-			[2,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,2],
+			[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
 			[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
 		],
 		pacman_home: {
@@ -53,6 +53,40 @@ var leveldata = [
 		//ghost homes in order: blinky, pinky, inky, clyde
 		ghosts: [{x: 11, y:8},{x:11,y:10},{x:12,y:10},{x:10,y:10}],
 		phases: [7,27,34,54,59,79,84]
+		
+	},
+	{
+	grid:[
+			[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+			[2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2],
+			[2,1,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,1,2],
+			[2,3,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,3,2],
+			[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
+			[2,1,2,2,2,1,2,1,2,2,2,2,2,2,2,1,2,1,2,2,2,1,2],
+			[2,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,2],
+			[2,2,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,2,2],
+			[0,0,0,0,2,1,2,1,1,1,1,0,1,1,1,1,2,1,2,0,0,0,0],
+			[2,2,2,2,2,1,2,1,2,2,2,0,2,2,2,1,2,1,2,2,2,2,2],
+			[0,0,0,0,0,1,1,1,2,0,0,0,0,0,2,1,1,1,0,0,0,0,0],
+			[2,2,2,2,2,1,2,1,2,2,2,2,2,2,2,1,2,1,2,2,2,2,2],
+			[0,0,0,0,2,1,2,1,1,1,1,1,1,1,1,1,2,1,2,0,0,0,0],
+			[2,2,2,2,2,1,2,1,2,2,2,2,2,2,2,1,2,1,2,2,2,2,2],
+			[2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2],
+			[2,1,2,2,2,1,2,2,2,2,1,2,1,2,2,2,2,1,2,2,2,1,2],
+			[2,3,1,1,2,1,1,1,1,1,1,0,1,1,1,1,1,1,2,1,1,3,2],
+			[2,2,2,1,2,1,2,1,2,2,2,2,2,2,2,1,2,1,2,1,2,2,2],
+			[2,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,2],
+			[2,1,2,2,2,2,2,2,2,2,1,2,1,2,2,2,2,2,2,2,2,1,2],
+			[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
+			[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+		],
+		pacman_home: {
+			x:11,
+			y:16
+		},
+		//ghost homes in order: blinky, pinky, inky, clyde
+		ghosts: [{x: 11, y:8},{x:11,y:10},{x:12,y:10},{x:10,y:10}],
+		phases: [7,27,34,54,59,1092,193]
 		
 	}
 ]
@@ -383,7 +417,6 @@ var pacman = {
 		$('.pacman').css("left", this.x*20);
 	},
 	death: function(){
-		console.log("XP")
 		this.goHome();
 		this.lives -=1;
 		$('#lives').html('');
@@ -438,12 +471,15 @@ function Grid(original){
 	}
 	
 	/**
-	*  @returns the number of rows
+	*  @returns the number of rows in the grid
 	**/
 	this.getHeight = function(){
 		return this.array.length;
 	}
 	
+	/**
+	*  @returns the width of the grid
+	**/
 	this.getWidth = function(){
 		return this.array[0].length;
 	}
@@ -516,7 +552,9 @@ function Grid(original){
 	
 }
 
-
+/**
+*  represents an instance of a game;
+**/
 function Game(lv){
 	
 	/**
@@ -593,11 +631,16 @@ function Game(lv){
 		running = false;
 		$('#pause').css('background', "orange");
 		$('#start').css('background', "blue");
-		$('h3').text("Level: " + level);
+		$('h3').text("Level: " + (level+1));
 		this.grid = new Grid(leveldata[level].grid);
 		this.gameTime = 0;
 		this.coinsCollected = 0;
-		this.frightened = false;
+		for (var i = 0; i<this.ghosts[0]; i++){
+			this.ghosts[i].frightened = false;
+			this.ghosts[i].frightCountDown = 0;
+		}
+		$(".ghost").removeClass("frightened");
+		
 		this.mode = "scatter";
 		$('#world').html('');
 		for (var y = 0; y<this.grid.getHeight(); y++){
@@ -629,22 +672,53 @@ function Game(lv){
 		{
 			$('#lives').append('<div class="life"></div>');
 		}
-		
-		
 	}
 	
 	/**
 	* One game tick
 	**/
 	this.step = function() {
-		
-		
+
 		//move pacman
 		if (pacman.turn){
 			
 			if(this.grid.canMove(pacman.x,pacman.y,pacman.nextDirection)){
 				pacman.direction = pacman.nextDirection;
 				pacman.turn = false;
+				if(pacman.direction == "right"){
+					$('.pacman').css({
+					"-ms-transform": "rotate(0deg)",
+						"-webkit-transform": "rotate(0deg)",
+						"transform": "rotate(0deg)"
+						
+					})
+				}
+				if(pacman.direction == "left"){
+					$('.pacman').css({
+						"-ms-transform": "rotate(180deg)",
+						"-webkit-transform": "rotate(180deg)",
+						"transform": "rotate(180deg)"
+						
+					})
+				}
+				if(pacman.direction == "up"){
+					$('.pacman').css({
+						"-ms-transform": "rotate(270deg)",
+						"-webkit-transform": "rotate(270deg)",
+						"transform": "rotate(270deg)"
+						
+					})
+				}
+				if(pacman.direction == "down"){
+					$('.pacman').css({
+						"-ms-transform": "rotate(90deg)",
+						"-webkit-transform": "rotate(90deg)",
+						"transform": "rotate(90deg)"
+					})
+				}
+				
+				
+				
 			}
 		}
 		
@@ -710,7 +784,6 @@ function Game(lv){
 		if(this.grid.getContents(pacman.x,pacman.y) == POWER){
 			this.grid.setContents(pacman.x,pacman.y, EMPTY);
 			this.score++;
-			this.coinsCollected++;
 			$('#score').text("Score: "+this.score);
 			$("#world .row:nth-child("+ (pacman.y+1) +") div:nth-child("+ (pacman.x+1) +")").removeClass();
 			$("#world .row:nth-child("+ (pacman.y+1) +") div:nth-child("+ (pacman.x+1) +")").addClass("empty");
@@ -789,11 +862,8 @@ function Game(lv){
 				}
 			}
 		}
-		
-		
 		//check if its time to change mode
 		if(this.phase < leveldata[this.level].phases.length && Math.floor(this.gameTime*(gameSpeed/1000)) == leveldata[this.level].phases[this.phase]){
-			console.log("Phase Change!");
 			this.changeMode = true;
 			this.phase++;
 			if(this.mode == "scatter")
@@ -804,9 +874,6 @@ function Game(lv){
 		
 		this.gameTime++;
 	}
-	
-	
-	
 	this.newLevel(this.level);
 }
 $(document).ready(function(){
