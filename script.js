@@ -32,18 +32,7 @@ var POWER = 3;
 /**
 * array of all level's data
 **/
-var leveldata = [
-	{
-		grid:[
-			[2,2,2,2,2,2,2],
-			[0,1,1,1,1,1,1],
-			[2,2,2,2,2,2,2]
-			],
-		pacman_home:{
-			x:0,
-			y:1
-		}
-	},	
+var leveldata = [	
 	{
 	grid:[
 			[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
@@ -72,7 +61,10 @@ var leveldata = [
 		pacman_home: {
 			x:11,
 			y:16
-		}
+		},
+		//ghost order: blinky, pinky, inky, clyde
+		ghosts: [{x: 11, y:8},{x:11,y:10}]
+		
 	}
 ]
 
@@ -93,13 +85,13 @@ var gameSpeed = 300;
 **/
 var pinky = {
 	name: "pinky",
-	direction: "right",
+	direction: "left",
 	x: 0,
 	y: 0,
-	
-	/**
-	* selects a direction based on the chase algorithm
-	**/
+	home: {
+		x:0,
+		y:0
+	},
 	chase: function(directions, grid){
 		if(directions.length>1){
 			var bestD = 10000000;
@@ -118,7 +110,61 @@ var pinky = {
 		}
 		else //if only 1 direction to go
 			this.direction = directions[0];
+		var loc = grid.getLocationInDirection(this.x,this.y,this.direction)
+		this.x = loc[0];
+		this.y = loc[1];
 	},
+	goHome: function(){
+		this.x = this.home.x;
+		this.y = this.home.y;
+	},
+	update: function(){
+		$('.pinky').css("top", this.y*20);
+		$('.pinky').css("left", this.x*20);
+	}
+}
+
+/**
+*  Object representing Blinky
+**/
+var blinky = {
+	name: "blinky",
+	direction: "left",
+	x: 0,
+	y: 0,
+	home: {
+		x:0,
+		y:0
+	},
+	chase: function(directions, grid){
+		if(directions.length>1){
+			var bestD = 10000000;
+			var best;
+			for (var j = 0; j<directions.length; j++){
+				var loc = grid.getLocationInDirection(this.x,this.y,directions[j])
+				var locD = Math.sqrt(Math.pow(loc[0]-this.x,2)+Math.pow(loc[1]-this.y,2));
+				if(bestD > locD ){
+					best = j;
+					bestD = locD;
+				}
+			}
+			this.direction = directions[best];
+		}
+		else //if only 1 direction to go
+			this.direction = directions[0];
+		var loc = grid.getLocationInDirection(this.x,this.y,this.direction)
+		this.x = loc[0];
+		this.y = loc[1];
+		
+	},
+	goHome: function(){
+		this.x = this.home.x;
+		this.y = this.home.y;
+	},
+	update: function(){
+		$('.blinky').css("top", this.y*20);
+		$('.blinky').css("left", this.x*20);
+	}
 }
 
 /**
@@ -209,21 +255,10 @@ function Grid(original){
 	}
 	
 	/**
-	* @returns a valid location on the grid a given distance and direction from x and y
+	*  @return a valid location on the grid. most importanatly, it wraps if out of bounds
 	**/
-	this.getLocationInDirection = function(x,y,direction,distance){
-		if (distance == undefined)
-			distance = 1;
-		for (var i = 0; i<distance; i++){
-			if (direction == "up")
-				y--;
-			if(direction == "down")
-				y++;
-			if(direction == "left")
-				x--;
-			if(direction == "right")
-				x++;
-		}
+	this.getLocation = function(x,y){
+		
 		if (x<0)
 			x = this.array[0].length-1;
 		else if (y<0)
@@ -236,13 +271,47 @@ function Grid(original){
 	}
 	
 	/**
-	* @returns a boolean. true if the given location is not a wall
+	* @returns a valid location on the grid a given distance and direction from x and y
 	**/
-	this.canMove = function(x,y){
-		return (this.array[y][x] != BRICK)
+	this.getLocationInDirection = function(x,y,direction,distance){
+		if (distance == undefined)
+			distance = 1;
+		for (var i = 0; i<distance; i++){
+			if (direction == "up")
+				y = this.getLocation(x,y-1)[1];
+			if(direction == "down")
+				y = this.getLocation(x,y+1)[1];
+			if(direction == "left")
+				x = this.getLocation(x-1,y)[0];
+			if(direction == "right")
+				x = this.getLocation(x+1,y)[0];
+		}
+		return[x,y];
 	}
 	
+	/**
+	* @returns a boolean. true if the given location is not a wall
+	**/
+	this.canMove = function(x,y,direction){
+		var loc = this.getLocationInDirection(x,y,direction);
+		return (this.array[loc[1]][loc[0]] != BRICK)
+	}
 	
+	/**
+	*  @returns an array of all directions a ghost could go
+	**/
+	this.getNextDirections = function(x,y,dir){
+		var directions = [];
+		if(dir != "left" && this.canMove(x,y,"right"))
+			directions.push("right");
+		if(dir != "right" && this.canMove(x,y,"left"))
+			directions.push("left");
+		if(dir != "up" && this.canMove(x,y,"down"))
+			directions.push("down");
+		if(dir != "down" && this.canMove(x,y,"up"))
+			directions.push("up");
+		return directions;
+	}
 	
 }
 
@@ -256,8 +325,9 @@ function Game(lv){
 	
 	/**
 	* an array that contains all the ghosts
+	* order: blinky, pinky, inky, clyde
 	**/
-	this.ghosts;
+	this.ghosts = [blinky, pinky];
 	
 	/**
 	* current game score. 
@@ -338,6 +408,13 @@ function Game(lv){
 		pacman.home.y = leveldata[level].pacman_home.y;
 		pacman.goHome();
 		pacman.update();
+		for(var i = 0; i<this.ghosts.length;i++){
+			this.ghosts[i].home.x = leveldata[level].ghosts[i].x;
+			this.ghosts[i].home.y = leveldata[level].ghosts[i].y;
+			this.ghosts[i].goHome();
+			this.ghosts[i].update();
+		}
+		
 		
 	}
 	
@@ -349,14 +426,15 @@ function Game(lv){
 		
 		//move pacman
 		if (pacman.turn){
-			var loc = this.grid.getLocationInDirection(pacman.x,pacman.y,pacman.nextDirection);
-			if(this.grid.canMove(loc[0],loc[1])){
+			
+			if(this.grid.canMove(pacman.x,pacman.y,pacman.nextDirection)){
 				pacman.direction = pacman.nextDirection;
 				pacman.turn = false;
 			}
 		}
-		var loc = this.grid.getLocationInDirection(pacman.x,pacman.y,pacman.direction);
-		if(this.grid.canMove(loc[0],loc[1])){
+		
+		if(this.grid.canMove(pacman.x,pacman.y,pacman.direction)){
+			var loc = this.grid.getLocationInDirection(pacman.x,pacman.y,pacman.direction)
 			pacman.x = loc[0];
 			pacman.y = loc[1];
 			pacman.update();
@@ -386,7 +464,14 @@ function Game(lv){
 			
 			},20);//give slight delay so pacman will move first before anouncing
 		}
+		//check if collected powerup
+		
 		//move ghosts
+		for(var i = 0; i<this.ghosts.length;i++){
+			this.ghosts[i].chase(this.grid.getNextDirections(this.ghosts[i].x,this.ghosts[i].y,this.ghosts[i].direction),this.grid)
+			this.ghosts[i].update();
+		}
+		
 		//check if in same position as pacman
 		
 		this.gameTime++;
@@ -440,8 +525,8 @@ $(document).ready(function(){
 		$('#start, #pause').show();
 	});
 	$('#world').after('<div class="pacman" direction="right" style="top: '+ pacman.y*20 +'px; left: '+ pacman.x*20 +'px; "></div>');
-	//$('#world').after('<div class="ghost blinky" style="top: '+ blinky.y*20 +'px; left: '+ ghosts[0].x*20 +'px; "></div>');
-	//$('#world').after('<div class="ghost pinky" style="top: '+ ghosts[1].y*20 +'px; left: '+ ghosts[1].x*20 +'px; "></div>');
+	$('#world').after('<div class="ghost blinky" style="top: '+ blinky.y*20 +'px; left: '+ blinky.x*20 +'px; "></div>');
+	$('#world').after('<div class="ghost pinky" style="top: '+ pinky.y*20 +'px; left: '+ pinky.x*20 +'px; "></div>');
 	
 	var game = new Game(0);
 	
