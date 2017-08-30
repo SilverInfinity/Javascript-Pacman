@@ -1,28 +1,12 @@
 /**
 *	STUFF TO IMPLEMENT
 * ----------------------------
-*  mode switch  
-*  scatter algorithms
-*  ghost collision
-*
-*
-*  More Ghosts
 *  More Levels
 *  Fruit (game apear after so many dots are eaten)
-*  big dot things that let you eat ghosts
+*  Ghost entry conditions
 *  flip pacman in the direction he is going
 *
 *  Random Levels?
-*  Ghost AI
-*  Blinky's chase
-*  Better documentation
-**/
-
-/**
-* Original Game notes: 
-* -------------
-*  ghosts’ speed is greatly reduced while they are in the tunnel.
-*  each ghost has a different algorithm for traversing the maze, interesting
 **/
 
 /**
@@ -67,7 +51,7 @@ var leveldata = [
 			y:16
 		},
 		//ghost homes in order: blinky, pinky, inky, clyde
-		ghosts: [{x: 11, y:8},{x:11,y:10}],
+		ghosts: [{x: 11, y:8},{x:11,y:10},{x:12,y:10},{x:10,y:10}],
 		phases: [7,27,34,54,59,79,84]
 		
 	}
@@ -84,72 +68,6 @@ var runner;
 * how fast each game tick is
 **/
 var gameSpeed = 200;
-
-/**
-* Object representing Pinky
-**/
-var pinky = {
-	name: "pinky",
-	direction: "left",
-	x: 0,
-	y: 0,
-	home: {
-		x:0,
-		y:0
-	},
-	frightened: false,
-	frightCountDown: 0,
-	chase: function(directions, grid){
-		if(directions.length>1){
-			var bestD = 10000000;
-			var best;
-			var target = grid.getLocationInDirection(pacman.x, pacman.y,pacman.direction, 4)
-			for (var j = 0; j<directions.length; j++){
-				var loc = grid.getLocationInDirection(this.x,this.y,directions[j])
-				var locD = Math.sqrt(Math.pow(loc[0]-target[0],2)+Math.pow(loc[1]-target[1],2));
-				var locD = Math.sqrt(Math.pow(loc[0]-target[0],2)+Math.pow(loc[1]-target[1],2));
-				if(bestD > locD ){
-					best = j;
-					bestD = locD;
-				}
-			}
-			this.direction = directions[best];
-		}
-		else //if only 1 direction to go
-			this.direction = directions[0];
-		var loc = grid.getLocationInDirection(this.x,this.y,this.direction)
-		this.x = loc[0];
-		this.y = loc[1];
-	},
-	scatter: function(directions, grid){
-		if(directions.length > 1){
-			var bestD = 10000000;
-			var best;
-			for (var j = 0; j<directions.length; j++){
-				var loc = grid.getLocationInDirection(this.x,this.y,directions[j])
-				var locD = Math.sqrt(Math.pow(loc[0]-0,2)+Math.pow(loc[1]-0,2));
-				if(bestD > locD ){
-					best = j;
-					bestD = locD;
-				}
-			}
-			this.direction = directions[best];
-		}
-		else //if only 1 direction to go
-			this.direction = directions[0];
-		var loc = grid.getLocationInDirection(this.x,this.y,this.direction)
-		this.x = loc[0];
-		this.y = loc[1];
-	},
-	goHome: function(){
-		this.x = this.home.x;
-		this.y = this.home.y;
-	},
-	update: function(){
-		$('.pinky').css("top", this.y*20);
-		$('.pinky').css("left", this.x*20);
-	}
-}
 
 /**
 *  Object representing Blinky
@@ -171,7 +89,7 @@ var blinky = {
 			var best;
 			for (var j = 0; j<directions.length; j++){
 				var loc = grid.getLocationInDirection(this.x,this.y,directions[j])
-				var locD = Math.sqrt(Math.pow(loc[0]-this.x,2)+Math.pow(loc[1]-this.y,2));
+				var locD = Math.sqrt(Math.pow(loc[0]-pacman.x,2)+Math.pow(loc[1]-pacman.y,2));
 				if(bestD > locD ){
 					best = j;
 					bestD = locD;
@@ -211,8 +129,226 @@ var blinky = {
 		this.y = this.home.y;
 	},
 	update: function(){
+		//$('.blinky').animate({top: this.y*20, left: this.x*20},gameSpeed-20)
 		$('.blinky').css("top", this.y*20);
 		$('.blinky').css("left", this.x*20);
+	}
+}
+
+/**
+* Object representing Pinky
+**/
+var pinky = {
+	name: "pinky",
+	direction: "left",
+	x: 0,
+	y: 0,
+	home: {
+		x:0,
+		y:0
+	},
+	frightened: false,
+	frightCountDown: 0,
+	chase: function(directions, grid){
+		if(directions.length>1){
+			var bestD = 10000000;
+			var best;
+			var target = grid.getLocationInDirection(pacman.x, pacman.y,pacman.direction, 4)
+			for (var j = 0; j<directions.length; j++){
+				var loc = grid.getLocationInDirection(this.x,this.y,directions[j])
+				var locD = Math.sqrt(Math.pow(loc[0]-target[0],2)+Math.pow(loc[1]-target[1],2));
+				if(bestD > locD ){
+					best = j;
+					bestD = locD;
+				}
+			}
+			this.direction = directions[best];
+		}
+		else //if only 1 direction to go
+			this.direction = directions[0];
+		var loc = grid.getLocationInDirection(this.x,this.y,this.direction)
+		this.x = loc[0];
+		this.y = loc[1];
+	},
+	scatter: function(directions, grid){
+		if(directions.length > 1){
+			var bestD = 10000000;
+			var best;
+			for (var j = 0; j<directions.length; j++){
+				var loc = grid.getLocationInDirection(this.x,this.y,directions[j])
+				var locD = Math.sqrt(Math.pow(loc[0]-0,2)+Math.pow(loc[1]-0,2));
+				if(bestD > locD ){
+					best = j;
+					bestD = locD;
+				}
+			}
+			this.direction = directions[best];
+		}
+		else //if only 1 direction to go
+			this.direction = directions[0];
+		var loc = grid.getLocationInDirection(this.x,this.y,this.direction)
+		this.x = loc[0];
+		this.y = loc[1];
+	},
+	goHome: function(){
+		this.x = this.home.x;
+		this.y = this.home.y;
+	},
+	update: function(){
+		//$('.pinky').animate({top: this.y*20, left: this.x*20},gameSpeed-20)
+		$('.pinky').css("top", this.y*20);
+		$('.pinky').css("left", this.x*20);
+	}
+}
+
+/**
+* Object representing Inky
+**/
+var inky = {
+	name: "inky",
+	direction: "left",
+	x: 0,
+	y: 0,
+	home: {
+		x:0,
+		y:0
+	},
+	frightened: false,
+	frightCountDown: 0,
+	chase: function(directions, grid){
+		if(directions.length>1){
+			var bestD = 10000000;
+			var best;
+			var target = grid.getLocationInDirection(pacman.x, pacman.y,pacman.direction, 2);
+			var targetY = Math.abs(blinky.y - (blinky.x-target[0]*2));
+			var targetX = Math.abs(blinky.x - (blinky.y-target[1]*2));
+			
+			for (var j = 0; j<directions.length; j++){
+				var loc = grid.getLocationInDirection(this.x,this.y,directions[j])
+				var locD = Math.sqrt(Math.pow(loc[0]-targetX,2)+Math.pow(loc[1]-targetY,2));
+				if(bestD > locD ){
+					best = j;
+					bestD = locD;
+				}
+			}
+			this.direction = directions[best];
+		}
+		else //if only 1 direction to go
+			this.direction = directions[0];
+		var loc = grid.getLocationInDirection(this.x,this.y,this.direction)
+		this.x = loc[0];
+		this.y = loc[1];
+	},
+	scatter: function(directions, grid){
+		if(directions.length > 1){
+			var bestD = 10000000;
+			var best;
+			for (var j = 0; j<directions.length; j++){
+				var loc = grid.getLocationInDirection(this.x,this.y,directions[j])
+				var locD = Math.sqrt(Math.pow(loc[0]-grid.getWidth(),2)+Math.pow(loc[1]-grid.getHeight(),2));
+				if(bestD > locD ){
+					best = j;
+					bestD = locD;
+				}
+			}
+			this.direction = directions[best];
+		}
+		else //if only 1 direction to go
+			this.direction = directions[0];
+		var loc = grid.getLocationInDirection(this.x,this.y,this.direction)
+		this.x = loc[0];
+		this.y = loc[1];
+	},
+	goHome: function(){
+		this.x = this.home.x;
+		this.y = this.home.y;
+	},
+	update: function(){
+		//$('.inky').animate({top: this.y*20, left: this.x*20},gameSpeed-20)
+		$('.inky').css("top", this.y*20);
+		$('.inky').css("left", this.x*20);
+	}
+	
+}
+
+/**
+* Object representing Clyde
+**/
+var clyde = {
+	name: "clyde",
+	direction: "left",
+	x: 0,
+	y: 0,
+	home: {
+		x:0,
+		y:0
+	},
+	frightened: false,
+	frightCountDown: 0,
+	chase: function(directions, grid){
+		if(directions.length>1){
+			if(Math.sqrt(Math.pow(this.x-pacman.x,2)+Math.pow(this.y-pacman.y,2)) > 8){
+				
+				var bestD = 10000000;
+				var best;
+				for (var j = 0; j<directions.length; j++){
+					var loc = grid.getLocationInDirection(this.x,this.y,directions[j])
+					var locD = Math.sqrt(Math.pow(loc[0]-pacman.x,2)+Math.pow(loc[1]-pacman.y,2));
+					if(bestD > locD ){
+						best = j;
+						bestD = locD;
+					}
+				}
+				this.direction = directions[best];
+			}
+			else{
+				var bestD = 10000000;
+				var best;
+				for (var j = 0; j<directions.length; j++){
+					var loc = grid.getLocationInDirection(this.x,this.y,directions[j])
+					var locD = Math.sqrt(Math.pow(loc[0],2)+Math.pow(loc[1]-grid.getHeight(),2));
+					if(bestD > locD ){
+						best = j;
+						bestD = locD;
+					}
+				}
+				this.direction = directions[best];
+			}
+		}
+		else //if only 1 direction to go
+			this.direction = directions[0];
+		var loc = grid.getLocationInDirection(this.x,this.y,this.direction)
+		this.x = loc[0];
+		this.y = loc[1];
+	},
+	scatter: function(directions, grid){
+		if(directions.length > 1){
+			var bestD = 10000000;
+			var best;
+			for (var j = 0; j<directions.length; j++){
+				var loc = grid.getLocationInDirection(this.x,this.y,directions[j])
+				var locD = Math.sqrt(Math.pow(loc[0],2)+Math.pow(loc[1]-grid.getHeight(),2));
+				if(bestD > locD ){
+					best = j;
+					bestD = locD;
+				}
+			}
+			this.direction = directions[best];
+		}
+		else //if only 1 direction to go
+			this.direction = directions[0];
+		var loc = grid.getLocationInDirection(this.x,this.y,this.direction)
+		this.x = loc[0];
+		this.y = loc[1];
+	},
+	goHome: function(){
+		this.x = this.home.x;
+		this.y = this.home.y;
+	},
+	update: function(){
+		//$('.clyde').animate({top: this.y*20, left: this.x*20},gameSpeed-20)
+		$('.clyde').css("top", this.y*20);
+		$('.clyde').css("left", this.x*20);
 	}
 }
 
@@ -242,18 +378,23 @@ var pacman = {
 	*  updates pacman's position on the page
 	**/
 	update: function(){
-		//$('.pacman').animate({top: this.y*20, left: this.x*20},200)
+		//$('.pacman').animate({top: this.y*20, left: this.x*20},gameSpeed-20)
 		$('.pacman').css("top", this.y*20);
 		$('.pacman').css("left", this.x*20);
 	},
 	death: function(){
+		console.log("XP")
 		this.goHome();
-		this.lives--
+		this.lives -=1;
 		$('#lives').html('');
 		for (var i = 0; i<this.lives; i++)
 		{
 			$('#lives').append('<div class="life"></div>');
 		}
+		inky.goHome();
+		pinky.goHome();
+		clyde.goHome();
+		blinky.goHome();
 	}
 	
 }
@@ -385,9 +526,9 @@ function Game(lv){
 	
 	/**
 	* an array that contains all the ghosts
-	* order: blinky, pinky, inky, clyde
+	* expected order: blinky, pinky, inky, clyde
 	**/
-	this.ghosts = [blinky, pinky];
+	this.ghosts = [blinky, pinky, inky, clyde];
 	
 	/**
 	* current game score. 
@@ -529,7 +670,7 @@ function Game(lv){
 					pacman.death();
 					pacman.update();
 					this.ghosts[i].goHome();
-					if (pacman.lives = 0){
+					if (pacman.lives == 0){
 						alert("Game Over!")
 						running = false;
 						clearInterval(runner);
@@ -636,7 +777,7 @@ function Game(lv){
 					pacman.death();
 					pacman.update();
 					this.ghosts[i].goHome();
-					if (pacman.lives = 0){
+					if (pacman.lives == 0){
 						alert("Game Over!")
 						running = false;
 						clearInterval(runner);
@@ -651,7 +792,7 @@ function Game(lv){
 		
 		
 		//check if its time to change mode
-		if(this.phase < leveldata[this.level].phases.length && this.gameTime*(gameSpeed/1000) == leveldata[this.level].phases[this.phase]){
+		if(this.phase < leveldata[this.level].phases.length && Math.floor(this.gameTime*(gameSpeed/1000)) == leveldata[this.level].phases[this.phase]){
 			console.log("Phase Change!");
 			this.changeMode = true;
 			this.phase++;
@@ -714,6 +855,8 @@ $(document).ready(function(){
 	$('#world').after('<div class="pacman" direction="right" style="top: '+ pacman.y*20 +'px; left: '+ pacman.x*20 +'px; "></div>');
 	$('#world').after('<div class="ghost blinky" style="top: '+ blinky.y*20 +'px; left: '+ blinky.x*20 +'px; "></div>');
 	$('#world').after('<div class="ghost pinky" style="top: '+ pinky.y*20 +'px; left: '+ pinky.x*20 +'px; "></div>');
+	$('#world').after('<div class="ghost inky" style="top: '+ inky.y*20 +'px; left: '+ inky.x*20 +'px; "></div>');
+	$('#world').after('<div class="ghost clyde" style="top: '+ clyde.y*20 +'px; left: '+ clyde.x*20 +'px; "></div>');
 	
 	var game = new Game(0);
 	
