@@ -1,7 +1,11 @@
 /**
 *	STUFF TO IMPLEMENT
 * ----------------------------
-*  
+*  mode switch  
+*  scatter algorithms
+*  ghost collision
+*
+*
 *  More Ghosts
 *  More Levels
 *  Fruit (game apear after so many dots are eaten)
@@ -62,8 +66,9 @@ var leveldata = [
 			x:11,
 			y:16
 		},
-		//ghost order: blinky, pinky, inky, clyde
-		ghosts: [{x: 11, y:8},{x:11,y:10}]
+		//ghost homes in order: blinky, pinky, inky, clyde
+		ghosts: [{x: 11, y:8},{x:11,y:10}],
+		phases: [7,27,34,54,59,79,84]
 		
 	}
 ]
@@ -78,7 +83,7 @@ var runner;
 /**
 * how fast each game tick is
 **/
-var gameSpeed = 300;
+var gameSpeed = 200;
 
 /**
 * Object representing Pinky
@@ -92,6 +97,8 @@ var pinky = {
 		x:0,
 		y:0
 	},
+	frightened: false,
+	frightCountDown: 0,
 	chase: function(directions, grid){
 		if(directions.length>1){
 			var bestD = 10000000;
@@ -101,6 +108,26 @@ var pinky = {
 				var loc = grid.getLocationInDirection(this.x,this.y,directions[j])
 				var locD = Math.sqrt(Math.pow(loc[0]-target[0],2)+Math.pow(loc[1]-target[1],2));
 				var locD = Math.sqrt(Math.pow(loc[0]-target[0],2)+Math.pow(loc[1]-target[1],2));
+				if(bestD > locD ){
+					best = j;
+					bestD = locD;
+				}
+			}
+			this.direction = directions[best];
+		}
+		else //if only 1 direction to go
+			this.direction = directions[0];
+		var loc = grid.getLocationInDirection(this.x,this.y,this.direction)
+		this.x = loc[0];
+		this.y = loc[1];
+	},
+	scatter: function(directions, grid){
+		if(directions.length > 1){
+			var bestD = 10000000;
+			var best;
+			for (var j = 0; j<directions.length; j++){
+				var loc = grid.getLocationInDirection(this.x,this.y,directions[j])
+				var locD = Math.sqrt(Math.pow(loc[0]-0,2)+Math.pow(loc[1]-0,2));
 				if(bestD > locD ){
 					best = j;
 					bestD = locD;
@@ -136,6 +163,8 @@ var blinky = {
 		x:0,
 		y:0
 	},
+	frightened: false,
+	frightCountDown: 0,
 	chase: function(directions, grid){
 		if(directions.length>1){
 			var bestD = 10000000;
@@ -156,6 +185,26 @@ var blinky = {
 		this.x = loc[0];
 		this.y = loc[1];
 		
+	},
+	scatter: function(directions, grid){
+		if(directions.length>1){
+			var bestD = 10000000;
+			var best;
+			for (var j = 0; j<directions.length; j++){
+				var loc = grid.getLocationInDirection(this.x,this.y,directions[j])
+				var locD = Math.sqrt(Math.pow(loc[0]-grid.getWidth(),2)+Math.pow(loc[1]-0,2));
+				if(bestD > locD ){
+					best = j;
+					bestD = locD;
+				}
+			}
+			this.direction = directions[best];
+		}
+		else //if only 1 direction to go
+			this.direction = directions[0];
+		var loc = grid.getLocationInDirection(this.x,this.y,this.direction)
+		this.x = loc[0];
+		this.y = loc[1];
 	},
 	goHome: function(){
 		this.x = this.home.x;
@@ -180,6 +229,7 @@ var pacman = {
 		x:0,
 		y:0
 	},
+	lives: 3,
 	/**
 	*  sets pacman's x and y to home values
 	**/
@@ -192,8 +242,18 @@ var pacman = {
 	*  updates pacman's position on the page
 	**/
 	update: function(){
+		//$('.pacman').animate({top: this.y*20, left: this.x*20},200)
 		$('.pacman').css("top", this.y*20);
 		$('.pacman').css("left", this.x*20);
+	},
+	death: function(){
+		this.goHome();
+		this.lives--
+		$('#lives').html('');
+		for (var i = 0; i<this.lives; i++)
+		{
+			$('#lives').append('<div class="life"></div>');
+		}
 	}
 	
 }
@@ -352,17 +412,17 @@ function Game(lv){
 	/**
 	* String containing the current ghost mode
 	**/
-	this.mode;
+	this.mode = "scatter";
 	
 	/**
-	* Boolean. true if ghosts are frightened
+	*  boolean. true if the game should change modes next turn.
 	**/
-	this.frightened;
+	this.changeMode = false;
 	
 	/**
-	* Number. Keeps track of how long till ghosts are no longer frightened
+	*  number. what numbered phase the game is in
 	**/
-	this.frightCountDown;
+	this.phase = 0;
 	
 	/**
 	* resets the game to default
@@ -373,6 +433,15 @@ function Game(lv){
 		this.score = 0;
 		$('#score').text("Score: "+this.score);
 		this.newLevel(0);
+		pacman.lives = 3;
+		$('#lives').html('');
+		for (var i = 0; i<lives; i++)
+		{
+			$('#lives').append('<div class="life"></div>');
+		}
+		this.level = 0;
+		this.newLevel(this.level);
+		$('#start, #pause').show();
 	}
 	
 	/**
@@ -414,6 +483,11 @@ function Game(lv){
 			this.ghosts[i].goHome();
 			this.ghosts[i].update();
 		}
+		$('#lives').html('');
+		for (var i = 0; i<pacman.lives; i++)
+		{
+			$('#lives').append('<div class="life"></div>');
+		}
 		
 		
 	}
@@ -440,8 +514,33 @@ function Game(lv){
 			pacman.update();
 		}
 		
-		//check if in the same position as a ghost
-			//consequenses
+		//check if in the same position as a ghost & consequenses
+		for (var i = 0; i< this.ghosts.length; i++){
+			if(pacman.x == this.ghosts[i].x && pacman.y == this.ghosts[i].y){
+				if(this.ghosts[i].frightened){
+					$('.'+this.ghosts[i].name).removeClass("frightened")
+					this.score+=100;
+					$('#score').text("Score: "+this.score);
+					this.ghosts[i].goHome();
+					this.ghosts[i].frightened = false;
+					this.ghosts[i].frightCountDown = 0;
+				}
+				else{
+					pacman.death();
+					pacman.update();
+					this.ghosts[i].goHome();
+					if (pacman.lives = 0){
+						alert("Game Over!")
+						running = false;
+						clearInterval(runner);
+						$('#pause').css('background', "blue");
+						$('#start').css('background', "blue");
+						$('#pause, #start').hide();
+						return;
+					}
+				}
+			}
+		}
 		
 		//collect coins
 		if(this.grid.getContents(pacman.x,pacman.y) == COIN){
@@ -452,6 +551,7 @@ function Game(lv){
 			$("#world .row:nth-child("+ (pacman.y+1) +") div:nth-child("+ (pacman.x+1) +")").removeClass();
 			$("#world .row:nth-child("+ (pacman.y+1) +") div:nth-child("+ (pacman.x+1) +")").addClass("empty");
 		}
+		
 		//check if collected all coins	
 		if(this.coinsCollected == this.grid.getCoins()){
 			var that = this;
@@ -464,15 +564,102 @@ function Game(lv){
 			
 			},20);//give slight delay so pacman will move first before anouncing
 		}
-		//check if collected powerup
+		
+		//collect powerups
+		if(this.grid.getContents(pacman.x,pacman.y) == POWER){
+			this.grid.setContents(pacman.x,pacman.y, EMPTY);
+			this.score++;
+			this.coinsCollected++;
+			$('#score').text("Score: "+this.score);
+			$("#world .row:nth-child("+ (pacman.y+1) +") div:nth-child("+ (pacman.x+1) +")").removeClass();
+			$("#world .row:nth-child("+ (pacman.y+1) +") div:nth-child("+ (pacman.x+1) +")").addClass("empty");
+			$(".ghost").addClass("frightened");
+			for (var i = 0; i<this.ghosts.length; i++){
+				this.ghosts[i].frightened = true;
+				this.ghosts[i].frightCountDown = 40;
+			}
+			
+		}
 		
 		//move ghosts
 		for(var i = 0; i<this.ghosts.length;i++){
-			this.ghosts[i].chase(this.grid.getNextDirections(this.ghosts[i].x,this.ghosts[i].y,this.ghosts[i].direction),this.grid)
-			this.ghosts[i].update();
+			if(this.ghosts[i].frightened && this.ghosts[i].frightCountDown != 0){ //if frightened, pick random direction
+				var dir = this.grid.getNextDirections(this.ghosts[i].x,this.ghosts[i].y,this.ghosts[i].direction)
+				this.ghosts[i].direction = dir[Math.floor(Math.random()*dir.length)];
+				this.ghosts[i].frightCountDown--
+				if(this.gameTime%2 ==0){
+				var loc = this.grid.getLocationInDirection(this.ghosts[i].x,this.ghosts[i].y,this.ghosts[i].direction)
+				this.ghosts[i].x = loc[0];
+				this.ghosts[i].y = loc[1];
+				}
+			
+			}
+		
+			else if(this.changeMode || (this.ghosts[i].frightened && this.ghosts[i].frightCountDown == 0)){
+				$("."+this.ghosts[i].name).removeClass("frightened");
+				this.ghosts[i].frightened = false;
+				if(this.ghosts[i].direction == "up")
+					this.ghosts[i].direction = "down";
+				else if(this.ghosts[i].direction == "down")
+					this.ghosts[i].direction = "up";
+				else if(this.ghosts[i].direction == "right")
+					this.ghosts[i].direction = "left";
+				else if(this.ghosts[i].direction == "left")
+					this.ghosts[i].direction = "right";
+				this.changeMode = false;
+				
+				var loc = this.grid.getLocationInDirection(this.ghosts[i].x,this.ghosts[i].y,this.ghosts[i].direction)
+				this.ghosts[i].x = loc[0];
+				this.ghosts[i].y = loc[1];
+			}
+			else if(this.mode == "chase"){
+				this.ghosts[i].chase(this.grid.getNextDirections(this.ghosts[i].x,this.ghosts[i].y,this.ghosts[i].direction),this.grid);
+			}
+			else if(this.mode == "scatter"){
+				this.ghosts[i].scatter(this.grid.getNextDirections(this.ghosts[i].x,this.ghosts[i].y,this.ghosts[i].direction),this.grid);
+			}
+			this.ghosts[i].update()
 		}
 		
-		//check if in same position as pacman
+		//check if a ghost is in same position as pacman
+		for (var i = 0; i< this.ghosts.length; i++){
+			if(pacman.x == this.ghosts[i].x && pacman.y == this.ghosts[i].y){
+				if(this.ghosts[i].frightened){
+					$('.'+this.ghosts[i].name).removeClass("frightened")
+					this.score+=100;
+					$('#score').text("Score: "+this.score);
+					this.ghosts[i].goHome();
+					this.ghosts[i].frightened = false;
+					this.ghosts[i].frightCountDown = 0;
+				}
+				else{
+					pacman.death();
+					pacman.update();
+					this.ghosts[i].goHome();
+					if (pacman.lives = 0){
+						alert("Game Over!")
+						running = false;
+						clearInterval(runner);
+						$('#pause').css('background', "blue");
+						$('#start').css('background', "blue");
+						$('#pause, #start').hide();
+						return;
+					}
+				}
+			}
+		}
+		
+		
+		//check if its time to change mode
+		if(this.phase < leveldata[this.level].phases.length && this.gameTime*(gameSpeed/1000) == leveldata[this.level].phases[this.phase]){
+			console.log("Phase Change!");
+			this.changeMode = true;
+			this.phase++;
+			if(this.mode == "scatter")
+				this.mode = "chase";
+			else
+				this.mode = "scatter";
+		}
 		
 		this.gameTime++;
 	}
