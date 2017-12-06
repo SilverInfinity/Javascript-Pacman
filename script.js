@@ -46,7 +46,7 @@ var leveldata = [
 			[2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
 			[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
 		],
-		pacman_home: {
+		pacman_home: {	//m B P I C
 			x:11,
 			y:16
 		},
@@ -507,7 +507,7 @@ function Grid(original){
 	**/
 	this.coins = 0;
 	
-	//initializes the grid array when new instance created, and counts the coins
+	//initializes the grid array with a deep copy of original when new instance created, and counts the coins
 	for (var i = 0; i< original.length; i++){
 		this.array.push([]);
 		for(var j = 0; j< original[i].length; j++){
@@ -869,7 +869,7 @@ function Game(lv){
 				}
 			
 			}
-		
+			//else if its time to switch modes (ex: chase to scatter, or the frightcountdown reached 0) then imediately turn backwards
 			else if(this.changeMode || (this.ghosts[i].frightened && this.ghosts[i].frightCountDown == 0)){
 				$("."+this.ghosts[i].name).removeClass("frightened");
 				this.ghosts[i].frightened = false;
@@ -893,7 +893,7 @@ function Game(lv){
 			else if(this.mode == "scatter"){
 				this.ghosts[i].scatter(this.grid.getNextDirections(this.ghosts[i].x,this.ghosts[i].y,this.ghosts[i].direction),this.grid);
 			}
-			this.ghosts[i].update()
+			this.ghosts[i].update();
 		}
 		
 		//check if a ghost is in same position as pacman
