@@ -1,1 +1,1 @@
-try it here: http://rawgit.com/SilverInfinity/Javascript-Pacman/master/index.html
+try it here: https://silverinfinity.github.io/Javascript-Pacman/
